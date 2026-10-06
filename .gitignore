@@ -1,5 +1,14 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
+# Environment files and secrets (API keys, tokens, credentials)
+/src/environments/*
+!/src/environments/*.example.ts
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
 # Compiled output
 /dist
 /tmp

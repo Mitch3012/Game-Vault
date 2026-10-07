@@ -1,3 +1,50 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme static {
+  --font-sans: 'Oxanium', sans-serif;
+  --color-vault-bg: #080d1a;
+  --color-vault-acid: #b6ff00;
+  --color-vault-blood: #ff1a1a;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-vault-bg);
+  /* Vignette: darker edges so it feels like a dark room */
+  background-image: radial-gradient(ellipse at center, transparent 40%, rgb(0 0 0 / 0.7) 100%);
+  background-attachment: fixed;
+}
+
+/* Shared button style for navigation links */
+.vault-btn {
+  @apply cursor-pointer rounded-sm bg-lime-400 px-4 py-2 font-bold tracking-widest text-slate-900 uppercase transition hover:shadow-[0_0_12px_var(--color-vault-acid)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-200;
+}
+
+/* Mostly steady, with a couple of quick glow dips every few seconds */
+@keyframes flicker {
+  0%,
+  91%,
+  95%,
+  100% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 0.5;
+  }
+  93% {
+    opacity: 0.9;
+  }
+  96% {
+    opacity: 0.65;
+  }
+}
+
+.flicker {
+  animation: flicker 10s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flicker {
+    animation: none;
+  }
+}

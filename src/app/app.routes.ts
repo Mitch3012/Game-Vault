@@ -1,17 +1,12 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, Routes } from '@angular/router';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { Routes } from '@angular/router';
 
-import { environment } from '../environments/environment';
+import { Home } from './home/home';
+import { Form } from './form/form';
+import { GameList } from './game-list/game-list';
 
-export const routes: Routes = [];
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
-    provideFirebaseApp(() => initializeApp(environment)),
-    provideFirestore(() => getFirestore()),
-  ],
-};
+export const routes: Routes = [
+  { path: '', component: Home },
+  { path: 'form', component: Form },
+  { path: 'game-list', component: GameList },
+  { path: '**', redirectTo: '' },
+];

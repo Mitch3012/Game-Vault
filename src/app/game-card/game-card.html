@@ -1,1 +1,42 @@
-<p>game-card works!</p>
+<article class="flex flex-col overflow-hidden rounded-sm border border-slate-800 bg-slate-900/60">
+  @if (game().coverUrl) {
+    <img
+      class="aspect-video w-full object-cover"
+      [src]="game().coverUrl"
+      [alt]="game().title + ' cover art'"
+      loading="lazy"
+    />
+  } @else {
+    <div
+      class="flex aspect-video w-full items-center justify-center bg-slate-800 text-xs tracking-widest text-slate-500 uppercase"
+    >
+      No cover
+    </div>
+  }
+
+  <div class="flex flex-1 flex-col gap-2 p-4">
+    <h3 class="text-lg font-bold text-slate-100">{{ game().title }}</h3>
+    <p class="text-sm text-slate-400">{{ year() }}</p>
+
+    @if (genres()) {
+      <p class="text-sm text-vault-acid">{{ genres() }}</p>
+    }
+    @if (platforms()) {
+      <p class="text-xs text-slate-400">{{ platforms() }}</p>
+    }
+
+    <div class="mt-auto pt-2">
+      @if (savedId()) {
+        <button
+          class="cursor-pointer rounded-sm border border-vault-blood px-4 py-2 text-sm font-bold tracking-widest text-vault-blood uppercase transition hover:shadow-[0_0_12px_var(--color-vault-blood)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
+          type="button"
+          (click)="onRemove()"
+        >
+          Remove
+        </button>
+      } @else {
+        <button class="vault-btn" type="button" (click)="onAdd()">Add to vault</button>
+      }
+    </div>
+  </div>
+</article>

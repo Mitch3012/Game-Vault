@@ -1,1 +1,16 @@
-<p>game-list works!</p>
+<section class="mx-auto flex max-w-5xl flex-col gap-4 p-4">
+  <h2 class="text-xl font-bold tracking-widest text-slate-100 uppercase">Your vault</h2>
+
+  @let items = games();
+  @if (items === null) {
+    <app-state-message text="Loading your vault…" />
+  } @else if (items.length === 0) {
+    <app-state-message text="Your vault is empty. Search for a game on the home page to add one." />
+  } @else {
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (game of items; track game.id) {
+        <app-game-card [game]="game" [savedId]="game.id" (remove)="onRemove($event)" />
+      }
+    </div>
+  }
+</section>

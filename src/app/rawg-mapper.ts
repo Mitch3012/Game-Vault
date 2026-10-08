@@ -1,4 +1,4 @@
-import { GameStatus, NewGameEntry } from './game-vault-crud-service';
+import { GameStatus, NewGameEntry } from './game-vault-interface';
 import { RawgGame, RawgNamed } from './rawg-interface';
 
 export const namesOf = (items: RawgNamed[] = []): string[] => items.map((item) => item.name);

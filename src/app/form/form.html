@@ -28,17 +28,8 @@
       </div>
 
       <div class="flex flex-col gap-1">
-        <label class="text-sm text-slate-300" for="rating">Rating (1 to 5, optional)</label>
-        <input
-          id="rating"
-          class="rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
-          type="text"
-          inputmode="numeric"
-          [formField]="detailsForm.rating"
-        />
-        @if (detailsForm.rating().touched() && detailsForm.rating().errors().length) {
-          <p class="text-sm text-vault-blood">{{ detailsForm.rating().errors()[0].message }}</p>
-        }
+        <span class="text-sm text-slate-300">Rating (optional, click the selected star again to clear)</span>
+        <app-star-rating [formField]="detailsForm.rating" />
       </div>
 
       <div class="flex flex-col gap-1">

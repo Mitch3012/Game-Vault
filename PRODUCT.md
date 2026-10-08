@@ -30,7 +30,7 @@ A solo gamer who:
 | One-click add   | Saves the game with cover art, platforms, genres and release date. Duplicates are ignored |
 | Vault list      | All saved games as cards, with loading and empty states                                  |
 | Status tracking | Wishlist, Playing, Completed, Dropped                                                    |
-| Rating          | 1 to 5, validated in the form                                                            |
+| Rating          | Optional 1 to 5 stars. Click a star to set it, click it again to clear                   |
 | Notes           | Free-text notes per game                                                                 |
 | Edit and remove | Edit details from the vault or remove a game from search or the list                     |
 | Live sync       | Changes appear straight away because the vault reads from Firestore in real time         |

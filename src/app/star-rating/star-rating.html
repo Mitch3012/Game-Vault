@@ -1,0 +1,16 @@
+<div class="flex gap-1" role="radiogroup" aria-label="Rating">
+  @for (star of stars(); track star.value) {
+    <button
+      class="cursor-pointer rounded-sm px-0.5 text-3xl leading-none transition hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
+      [class.text-vault-acid]="star.filled"
+      [class.text-slate-600]="!star.filled"
+      type="button"
+      role="radio"
+      [attr.aria-checked]="star.checked"
+      [attr.aria-label]="star.label"
+      (click)="onSelect(star.value)"
+    >
+      ★
+    </button>
+  }
+</div>

@@ -1,7 +1,8 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { GameEntryWithId, GameVaultCrudService } from './game-vault-crud-service';
+import { GameVaultCrudService } from './game-vault-crud-service';
+import { GameEntryWithId } from './game-vault-interface';
 import { GameVaultService, findByRawgId } from './game-vault-service';
 import { RawgService } from './rawg-service';
 

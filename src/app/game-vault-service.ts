@@ -1,11 +1,7 @@
 import { Service, inject, signal } from '@angular/core';
 
-import {
-  GameEntryChanges,
-  GameEntryWithId,
-  GameStatus,
-  GameVaultCrudService,
-} from './game-vault-crud-service';
+import { GameVaultCrudService } from './game-vault-crud-service';
+import { GameEntryChanges, GameEntryWithId, GameStatus } from './game-vault-interface';
 import { RawgService } from './rawg-service';
 
 export const findByRawgId = (games: GameEntryWithId[] | null, rawgId: number): GameEntryWithId | undefined =>

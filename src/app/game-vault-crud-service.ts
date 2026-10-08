@@ -13,30 +13,8 @@ import {
 } from '@angular/fire/firestore';
 import { catchError, map, of } from 'rxjs';
 
-// DRAFT for review. Move these into game-vault-interface.ts / a constants file when approved.
-export const GAMES_COLLECTION = 'games';
-
-export type GameStatus = 'wishlist' | 'playing' | 'completed' | 'dropped';
-
-export interface GameEntry {
-  rawgId: number;
-  title: string;
-  coverUrl: string;
-  platforms: string[];
-  genres: string[];
-  releaseDate: string;
-  rating: number | null;
-  status: GameStatus;
-  notes: string;
-  addedAt: number;
-}
-
-export interface GameEntryWithId extends GameEntry {
-  id: string;
-}
-
-export type NewGameEntry = Omit<GameEntry, 'addedAt'>;
-export type GameEntryChanges = Partial<Omit<GameEntry, 'addedAt'>>;
+import { GAMES_COLLECTION } from './game-vault.constants';
+import { GameEntry, GameEntryChanges, GameEntryWithId, NewGameEntry } from './game-vault-interface';
 
 export const assertId = (id: string): void => {
   if (!id) throw new Error('GameVaultCrudService: an id is required');

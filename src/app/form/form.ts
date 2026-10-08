@@ -1,15 +1,16 @@
 import { Component, computed, inject, input, linkedSignal, signal, untracked } from '@angular/core';
-import { FormField, FormRoot, form, validate } from '@angular/forms/signals';
+import { FormField, FormRoot, form } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 
 import { GameVaultService } from '../game-vault-service';
+import { StarRating } from '../star-rating/star-rating';
 import { StateMessage } from '../state-message/state-message';
-import { FormModel, findById, ratingError, toChanges, toFormModel } from './form-helpers';
+import { FormModel, findById, toChanges, toFormModel } from './form-helpers';
 import { GAME_LIST_URL, SAVE_ERROR_MESSAGE, STATUS_OPTIONS } from './form.constants';
 
 /** Edit the details of a saved game (status, rating, notes). Route: /form/:id */
 @Component({
-  imports: [FormField, FormRoot, RouterLink, StateMessage],
+  imports: [FormField, FormRoot, RouterLink, StarRating, StateMessage],
   selector: 'app-form',
   styleUrl: './form.css',
   templateUrl: './form.html',
@@ -32,11 +33,7 @@ export class Form {
     computation: () => toFormModel(untracked(this.game)),
   });
 
-  protected readonly detailsForm = form(
-    this.model,
-    (path) => validate(path.rating, ({ value }) => ratingError(value())),
-    { submission: { action: async () => this.save() } },
-  );
+  protected readonly detailsForm = form(this.model, { submission: { action: async () => this.save() } });
 
   private async save(): Promise<undefined> {
     this.saveError.set('');

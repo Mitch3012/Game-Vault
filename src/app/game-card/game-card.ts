@@ -1,7 +1,7 @@
 import { Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { NewGameEntry } from '../game-vault-crud-service';
+import { NewGameEntry } from '../game-vault-interface';
 import { formatList, releaseYear } from './game-card-helpers';
 import { ADD_COOLDOWN_MS } from './game-card.constants';
 

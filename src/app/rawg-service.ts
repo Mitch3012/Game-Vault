@@ -3,7 +3,7 @@ import { Service, Signal, computed, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { environment } from '../environments/environment';
-import { NewGameEntry } from './game-vault-crud-service';
+import { NewGameEntry } from './game-vault-interface';
 import { RawgGame, RawgListResponse } from './rawg-interface';
 import { toNewGameEntries, toNewGameEntry } from './rawg-mapper';
 import { RAWG_BASE_URL, RAWG_GAMES_PATH, RAWG_SEARCH_PAGE_SIZE } from './rawg.constants';

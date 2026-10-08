@@ -2,10 +2,10 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter, withComponentInputBinding } from '@angular/router';
 
-import { GameEntryWithId } from '../game-vault-crud-service';
+import { GameEntryWithId } from '../game-vault-interface';
 import { GameVaultService } from '../game-vault-service';
 import { Form } from './form';
-import { findById, parseRating, ratingError, toChanges, toFormModel } from './form-helpers';
+import { findById, toChanges, toFormModel } from './form-helpers';
 
 const saved = {
   id: 'doc1',
@@ -24,28 +24,13 @@ describe('form helpers', () => {
   });
 
   it('builds the form model from a game, with defaults when there is none', () => {
-    expect(toFormModel(saved)).toEqual({ status: 'playing', rating: '4', notes: 'Fun so far' });
-    expect(toFormModel(undefined)).toEqual({ status: 'wishlist', rating: '', notes: '' });
-    expect(toFormModel({ ...saved, rating: null }).rating).toBe('');
-  });
-
-  it('parses an empty rating as null', () => {
-    expect(parseRating('  ')).toBeNull();
-    expect(parseRating('3')).toBe(3);
-  });
-
-  it('accepts empty or whole numbers in range and rejects everything else', () => {
-    expect(ratingError('')).toBeUndefined();
-    expect(ratingError('1')).toBeUndefined();
-    expect(ratingError('5')).toBeUndefined();
-    expect(ratingError('0')?.kind).toBe('rating');
-    expect(ratingError('6')?.kind).toBe('rating');
-    expect(ratingError('2.5')?.kind).toBe('rating');
-    expect(ratingError('abc')?.kind).toBe('rating');
+    expect(toFormModel(saved)).toEqual({ status: 'playing', rating: 4, notes: 'Fun so far' });
+    expect(toFormModel(undefined)).toEqual({ status: 'wishlist', rating: null, notes: '' });
+    expect(toFormModel({ ...saved, rating: null }).rating).toBeNull();
   });
 
   it('turns the model into changes, trimming notes', () => {
-    expect(toChanges({ status: 'completed', rating: '', notes: '  great  ' })).toEqual({
+    expect(toChanges({ status: 'completed', rating: null, notes: '  great  ' })).toEqual({
       status: 'completed',
       rating: null,
       notes: 'great',
@@ -63,9 +48,15 @@ describe('Form', () => {
   const html = () => fixture.nativeElement as HTMLElement;
   const field = <T extends HTMLElement>(id: string) => html().querySelector<T>(`#${id}`)!;
 
-  const type = async (element: HTMLInputElement | HTMLTextAreaElement, value: string) => {
+  const type = async (element: HTMLTextAreaElement, value: string) => {
     element.value = value;
     element.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+  };
+
+  const stars = () => Array.from(html().querySelectorAll<HTMLButtonElement>('[role="radio"]'));
+  const clickStar = async (value: number) => {
+    stars()[value - 1].click();
     await fixture.whenStable();
   };
 
@@ -99,7 +90,7 @@ describe('Form', () => {
   it('pre-fills the form from the saved game', () => {
     expect(html().textContent).toContain('Saved Game');
     expect(field<HTMLSelectElement>('status').value).toBe('playing');
-    expect(field<HTMLInputElement>('rating').value).toBe('4');
+    expect(stars().map((star) => star.getAttribute('aria-checked'))).toEqual(['false', 'false', 'false', 'true', 'false']);
     expect(field<HTMLTextAreaElement>('notes').value).toBe('Fun so far');
   });
 
@@ -107,7 +98,7 @@ describe('Form', () => {
     const status = field<HTMLSelectElement>('status');
     status.value = 'completed';
     status.dispatchEvent(new Event('input'));
-    await type(field<HTMLInputElement>('rating'), '5');
+    await clickStar(5);
     await type(field<HTMLTextAreaElement>('notes'), 'Finished it');
 
     html().querySelector<HTMLButtonElement>('button[type="submit"]')?.click();
@@ -117,24 +108,11 @@ describe('Form', () => {
     expect(navigate).toHaveBeenCalledWith('/game-list');
   });
 
-  it('clearing the rating saves null', async () => {
-    await type(field<HTMLInputElement>('rating'), '');
+  it('clicking the selected star clears the rating and saves null', async () => {
+    await clickStar(4);
     html().querySelector<HTMLButtonElement>('button[type="submit"]')?.click();
     await fixture.whenStable();
     expect(vault.updateGame).toHaveBeenCalledWith('doc1', expect.objectContaining({ rating: null }));
-  });
-
-  it('blocks saving an invalid rating and shows why', async () => {
-    const rating = field<HTMLInputElement>('rating');
-    await type(rating, '9');
-    rating.dispatchEvent(new Event('blur'));
-    await fixture.whenStable();
-
-    expect(html().textContent).toContain('Rating must be a whole number from 1 to 5');
-    expect(html().querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
-    html().querySelector('form')?.dispatchEvent(new Event('submit'));
-    await fixture.whenStable();
-    expect(vault.updateGame).not.toHaveBeenCalled();
   });
 
   it('shows an error and stays on the page when saving fails', async () => {

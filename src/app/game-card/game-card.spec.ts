@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-import { NewGameEntry } from '../game-vault-crud-service';
+import { NewGameEntry } from '../game-vault-interface';
 import { GameCard } from './game-card';
 import { formatList, releaseYear } from './game-card-helpers';
 import { ADD_COOLDOWN_MS } from './game-card.constants';

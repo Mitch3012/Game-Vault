@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-import { GameEntryWithId, NewGameEntry } from '../game-vault-crud-service';
+import { GameEntryWithId, NewGameEntry } from '../game-vault-interface';
 import { GameVaultService } from '../game-vault-service';
 import { Home } from './home';
 import { savedIdByRawgId } from './home-helpers';

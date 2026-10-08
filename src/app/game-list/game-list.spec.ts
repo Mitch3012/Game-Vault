@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { GameEntryWithId } from '../game-vault-crud-service';
 import { GameVaultService } from '../game-vault-service';
@@ -20,7 +21,7 @@ describe('GameList', () => {
     vault.removeGame.mockClear();
     await TestBed.configureTestingModule({
       imports: [GameList],
-      providers: [{ provide: GameVaultService, useValue: vault }],
+      providers: [provideRouter([]), { provide: GameVaultService, useValue: vault }],
     }).compileComponents();
     fixture = TestBed.createComponent(GameList);
     await fixture.whenStable();

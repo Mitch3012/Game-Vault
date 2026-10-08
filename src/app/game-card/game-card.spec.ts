@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { NewGameEntry } from '../game-vault-crud-service';
 import { GameCard } from './game-card';
 import { formatList, releaseYear } from './game-card-helpers';
+import { ADD_COOLDOWN_MS } from './game-card.constants';
 
 const game: NewGameEntry = {
   rawgId: 7,
@@ -13,6 +15,7 @@ const game: NewGameEntry = {
   releaseDate: '2020-05-01',
   rating: null,
   status: 'wishlist',
+  notes: '',
 };
 
 describe('game card helpers', () => {
@@ -31,7 +34,10 @@ describe('GameCard', () => {
   const html = () => fixture.nativeElement as HTMLElement;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [GameCard] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [GameCard],
+      providers: [provideRouter([])],
+    }).compileComponents();
     fixture = TestBed.createComponent(GameCard);
     fixture.componentRef.setInput('game', game);
     await fixture.whenStable();
@@ -49,6 +55,29 @@ describe('GameCard', () => {
     expect(emitted).toBe(7);
   });
 
+  it('disables Add for a moment after a click, so a double click only adds once', () => {
+    vi.useFakeTimers();
+    try {
+      const emitted: number[] = [];
+      fixture.componentInstance.add.subscribe((id) => emitted.push(id));
+      const button = html().querySelector('button')!;
+
+      button.click();
+      button.click();
+      fixture.detectChanges();
+      expect(emitted).toEqual([7]);
+      expect(button.disabled).toBe(true);
+      expect(button.textContent).toContain('Adding');
+
+      vi.advanceTimersByTime(ADD_COOLDOWN_MS);
+      fixture.detectChanges();
+      expect(button.disabled).toBe(false);
+      expect(button.textContent).toContain('Add to vault');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('shows Remove and emits the saved id when the game is in the vault', async () => {
     let emitted: string | undefined;
     fixture.componentInstance.remove.subscribe((id) => (emitted = id));
@@ -58,5 +87,12 @@ describe('GameCard', () => {
     expect(button?.textContent).toContain('Remove');
     button?.click();
     expect(emitted).toBe('doc1');
+  });
+
+  it('links to the edit form for a saved game, and not for an unsaved one', async () => {
+    expect(html().querySelector('a')).toBeNull();
+    fixture.componentRef.setInput('savedId', 'doc1');
+    await fixture.whenStable();
+    expect(html().querySelector('a')?.getAttribute('href')).toBe('/form/doc1');
   });
 });

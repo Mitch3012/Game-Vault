@@ -15,6 +15,7 @@ export const toNewGameEntry = (game: RawgGame, status: GameStatus = 'wishlist'):
   releaseDate: game.released ?? '',
   rating: null,
   status,
+  notes: '',
 });
 
 export const toNewGameEntries = (games: RawgGame[] = [], status: GameStatus = 'wishlist'): NewGameEntry[] =>

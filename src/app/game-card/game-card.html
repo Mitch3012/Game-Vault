@@ -1,4 +1,6 @@
-<article class="flex flex-col overflow-hidden rounded-sm border border-slate-800 bg-slate-900/60">
+<article
+  class="flex flex-col overflow-hidden rounded-sm border-2 border-slate-700 bg-slate-900/60 shadow-[0_4px_16px_rgb(0_0_0/0.6),0_0_12px_rgb(182_255_0/0.12)]"
+>
   @if (game().coverUrl) {
     <img
       class="aspect-video w-full object-cover"
@@ -25,8 +27,9 @@
       <p class="text-xs text-slate-400">{{ platforms() }}</p>
     }
 
-    <div class="mt-auto pt-2">
+    <div class="mt-auto flex flex-wrap gap-3 pt-2">
       @if (savedId()) {
+        <a class="vault-btn" [routerLink]="['/form', savedId()]">Edit</a>
         <button
           class="cursor-pointer rounded-sm border border-vault-blood px-4 py-2 text-sm font-bold tracking-widest text-vault-blood uppercase transition hover:shadow-[0_0_12px_var(--color-vault-blood)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
           type="button"
@@ -35,7 +38,9 @@
           Remove
         </button>
       } @else {
-        <button class="vault-btn" type="button" (click)="onAdd()">Add to vault</button>
+        <button class="vault-btn" type="button" [disabled]="adding()" (click)="onAdd()">
+          {{ adding() ? 'Adding…' : 'Add to vault' }}
+        </button>
       }
     </div>
   </div>

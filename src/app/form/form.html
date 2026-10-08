@@ -1,1 +1,71 @@
-<p>form works!</p>
+<section class="mx-auto flex max-w-xl flex-col gap-4 p-4">
+  <h2 class="text-xl font-bold tracking-widest text-slate-100 uppercase">Edit game</h2>
+
+  @let current = game();
+  @if (isLoading()) {
+    <app-state-message text="Loading…" />
+  } @else if (!current) {
+    <app-state-message text="Game not found" />
+    <a class="vault-btn self-center" routerLink="/game-list">Back to your vault</a>
+  } @else {
+    <form
+      class="flex flex-col gap-4 rounded-sm border-2 border-slate-700 bg-slate-900/60 p-4 shadow-[0_4px_16px_rgb(0_0_0/0.6),0_0_12px_rgb(182_255_0/0.12)]"
+      [formRoot]="detailsForm"
+    >
+      <h3 class="text-lg font-bold text-slate-100">{{ current.title }}</h3>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm text-slate-300" for="status">Status</label>
+        <select
+          id="status"
+          class="rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
+          [formField]="detailsForm.status"
+        >
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm text-slate-300" for="rating">Rating (1 to 5, optional)</label>
+        <input
+          id="rating"
+          class="rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
+          type="text"
+          inputmode="numeric"
+          [formField]="detailsForm.rating"
+        />
+        @if (detailsForm.rating().touched() && detailsForm.rating().errors().length) {
+          <p class="text-sm text-vault-blood">{{ detailsForm.rating().errors()[0].message }}</p>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm text-slate-300" for="notes">Notes</label>
+        <textarea
+          id="notes"
+          class="rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
+          rows="4"
+          [formField]="detailsForm.notes"
+        ></textarea>
+      </div>
+
+      @if (saveError()) {
+        <p class="text-sm text-vault-blood">{{ saveError() }}</p>
+      }
+
+      <div class="flex flex-wrap gap-3">
+        <button class="vault-btn" type="submit" [disabled]="detailsForm().invalid() || detailsForm().submitting()">
+          Save
+        </button>
+        <a
+          class="cursor-pointer rounded-sm border-2 border-slate-600 px-4 py-2 font-bold tracking-widest text-slate-300 uppercase transition hover:border-slate-400"
+          routerLink="/game-list"
+        >
+          Cancel
+        </a>
+      </div>
+    </form>
+  }
+</section>

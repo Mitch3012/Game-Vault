@@ -16,6 +16,7 @@ const entry = (rawgId: number): NewGameEntry => ({
   releaseDate: '',
   rating: null,
   status: 'wishlist',
+  notes: '',
 });
 
 describe('savedIdByRawgId', () => {

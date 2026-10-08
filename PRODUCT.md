@@ -34,6 +34,7 @@ A solo gamer who:
 | Notes           | Free-text notes per game                                                                 |
 | Edit and remove | Edit details from the vault or remove a game from search or the list                     |
 | Live sync       | Changes appear straight away because the vault reads from Firestore in real time         |
+| Error feedback  | A failed add or remove shows a dismissible message on the page                           |
 
 ## User flows
 
@@ -57,15 +58,15 @@ A solo gamer who:
 ## Known gaps
 
 - No sign-in, so the vault is shared by everyone who uses the app.
-- Failed add and remove actions give no feedback to the user. Only saving the edit form shows an error.
+- The "Adding…" button state resets on a timer, not on the real result of the add.
 - No way to filter or sort the vault.
 
 ## Proposed next steps
 
 These are suggestions, not commitments.
 
-1. Show an error message when add or remove fails.
-2. Filter and sort the vault by status, rating and date added.
+1. Filter and sort the vault by status, rating and date added.
+2. Show the star rating on the cards.
 3. Change status directly from the card.
 4. Add authentication so each user has a private vault, with matching Firestore security rules.
 5. Add a detail view per game.

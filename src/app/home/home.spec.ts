@@ -31,6 +31,8 @@ describe('Home', () => {
     searchTerm: signal(''),
     searchResults: signal<NewGameEntry[] | null>([]),
     games: signal<GameEntryWithId[] | null>([]),
+    actionError: signal(''),
+    clearActionError: vi.fn(),
     setSearchTerm: vi.fn(),
     addToVault: vi.fn(() => Promise.resolve('doc1')),
     removeGame: vi.fn(() => Promise.resolve()),
@@ -41,6 +43,8 @@ describe('Home', () => {
   beforeEach(async () => {
     vault.searchTerm.set('');
     vault.searchResults.set([]);
+    vault.actionError.set('');
+    vault.clearActionError.mockClear();
     vault.setSearchTerm.mockClear();
     vault.addToVault.mockClear();
     await TestBed.configureTestingModule({
@@ -80,5 +84,22 @@ describe('Home', () => {
     expect(html().querySelectorAll('app-game-card').length).toBe(2);
     html().querySelector<HTMLButtonElement>('app-game-card button')?.click();
     expect(vault.addToVault).toHaveBeenCalledWith(1);
+  });
+
+  it('shows no error banner when there is no error', () => {
+    expect(html().querySelector('app-error-banner')).toBeNull();
+  });
+
+  it('shows the action error, and clears it when dismissed', async () => {
+    vault.actionError.set('Could not add that game.');
+    await fixture.whenStable();
+    expect(html().querySelector('[role="alert"]')?.textContent).toContain('Could not add that game.');
+    html().querySelector<HTMLButtonElement>('[role="alert"] button')?.click();
+    expect(vault.clearActionError).toHaveBeenCalled();
+  });
+
+  it('clears the action error when the page is left', () => {
+    fixture.destroy();
+    expect(vault.clearActionError).toHaveBeenCalled();
   });
 });

@@ -1,0 +1,13 @@
+<div
+  class="flex items-center justify-between gap-3 rounded-sm border border-vault-blood px-4 py-2 text-sm text-vault-blood"
+  role="alert"
+>
+  <p>{{ message() }}</p>
+  <button
+    class="cursor-pointer font-bold tracking-widest uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
+    type="button"
+    (click)="dismiss.emit()"
+  >
+    Dismiss
+  </button>
+</div>

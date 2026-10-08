@@ -11,6 +11,8 @@ const saved = { id: 'doc1', rawgId: 1, title: 'Saved Game', genres: [], platform
 describe('GameList', () => {
   const vault = {
     games: signal<GameEntryWithId[] | null>(null),
+    actionError: signal(''),
+    clearActionError: vi.fn(),
     removeGame: vi.fn(() => Promise.resolve()),
   };
   let fixture: ComponentFixture<GameList>;
@@ -18,6 +20,8 @@ describe('GameList', () => {
 
   beforeEach(async () => {
     vault.games.set(null);
+    vault.actionError.set('');
+    vault.clearActionError.mockClear();
     vault.removeGame.mockClear();
     await TestBed.configureTestingModule({
       imports: [GameList],
@@ -43,5 +47,18 @@ describe('GameList', () => {
     expect(html().querySelectorAll('app-game-card').length).toBe(1);
     html().querySelector<HTMLButtonElement>('app-game-card button')?.click();
     expect(vault.removeGame).toHaveBeenCalledWith('doc1');
+  });
+
+  it('shows the action error, and clears it when dismissed', async () => {
+    vault.actionError.set('Could not remove that game.');
+    await fixture.whenStable();
+    expect(html().querySelector('[role="alert"]')?.textContent).toContain('Could not remove that game.');
+    html().querySelector<HTMLButtonElement>('[role="alert"] button')?.click();
+    expect(vault.clearActionError).toHaveBeenCalled();
+  });
+
+  it('clears the action error when the page is left', () => {
+    fixture.destroy();
+    expect(vault.clearActionError).toHaveBeenCalled();
   });
 });

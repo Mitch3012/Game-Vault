@@ -17,6 +17,10 @@
     <button class="vault-btn" type="button" (click)="onSearch(search.value)">Search</button>
   </div>
 
+  @if (actionError()) {
+    <app-error-banner [message]="actionError()" (dismiss)="onDismissError()" />
+  }
+
   @let items = results();
   @if (items === null) {
     <app-state-message text="Searching…" />

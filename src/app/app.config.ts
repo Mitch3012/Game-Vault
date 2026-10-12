@@ -1,4 +1,9 @@
-import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -8,6 +13,7 @@ import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angul
 import { routes } from './app.routes';
 import { FirebaseStatusService } from './firebase-status-service';
 import { environment } from '../environments/environment';
+import { Auth, provideAuth, getAuth } from '@angular/fire/auth';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,12 +24,13 @@ export const appConfig: ApplicationConfig = {
     provideAppCheck(() =>
       initializeAppCheck(undefined, {
         provider: new ReCaptchaV3Provider(environment.recaptchaSiteKey),
-        isTokenAutoRefreshEnabled: true
-      })
+        isTokenAutoRefreshEnabled: true,
+      }),
     ),
+    provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideAppInitializer(() => {
       inject(FirebaseStatusService).logConnection();
-    })
-  ]
+    }),
+  ],
 };

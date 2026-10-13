@@ -1,19 +1,29 @@
 import { Service, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
+import { loginErrorMessage } from './auth/auth-helpers';
+import { LOGIN_SUCCESS_ROUTE } from './auth/auth.constants';
 import { GameVaultCrudService } from './game-vault-crud-service';
 import { GameEntryChanges, GameEntryWithId, GameStatus } from './game-vault-interface';
 import { ADD_ERROR_MESSAGE, REMOVE_ERROR_MESSAGE } from './game-vault.constants';
 import { RawgService } from './rawg-service';
+import { Authservice } from './auth/auth-service';
 
-export const findByRawgId = (games: GameEntryWithId[] | null, rawgId: number): GameEntryWithId | undefined =>
-  games?.find((game) => game.rawgId === rawgId);
+export const findByRawgId = (
+  games: GameEntryWithId[] | null,
+  rawgId: number,
+): GameEntryWithId | undefined => games?.find((game) => game.rawgId === rawgId);
 
 /** Facade: the only service components talk to. */
 @Service()
 export class GameVaultService {
   private readonly crud = inject(GameVaultCrudService);
   private readonly rawg = inject(RawgService);
+  private readonly auth = inject(Authservice);
+  private readonly router = inject(Router);
   private readonly error = signal('');
+  private readonly loginErrorState = signal('');
+  private readonly pending = signal(false);
 
   readonly searchTerm = signal('');
 
@@ -25,6 +35,12 @@ export class GameVaultService {
 
   /** Message for the last failed add or remove. `''` = no error. */
   readonly actionError = this.error.asReadonly();
+
+  /** Message for the last failed login. `''` = no error. */
+  readonly loginError = this.loginErrorState.asReadonly();
+
+  /** `true` while a login is in flight. */
+  readonly loginPending = this.pending.asReadonly();
 
   setSearchTerm(term: string): void {
     this.searchTerm.set(term);
@@ -46,6 +62,31 @@ export class GameVaultService {
   /** Deletes the game. Never rejects: a failure sets `actionError` instead. */
   async removeGame(id: string): Promise<void> {
     await this.attempt(() => this.crud.delete(id), REMOVE_ERROR_MESSAGE);
+  }
+
+  clearLoginError(): void {
+    this.loginErrorState.set('');
+  }
+
+  /** Signs in, then goes home. Never rejects: a failure resolves `false` and sets `loginError`. */
+  async login(email: string, password: string): Promise<boolean> {
+    this.pending.set(true);
+    const signedIn = await this.signIn(email, password);
+    this.pending.set(false);
+    if (signedIn) await this.router.navigateByUrl(LOGIN_SUCCESS_ROUTE);
+    return signedIn;
+  }
+
+  private async signIn(email: string, password: string): Promise<boolean> {
+    try {
+      await this.auth.login(email, password);
+      this.clearLoginError();
+      return true;
+    } catch (error) {
+      console.error('[GameVaultService] login failed', error);
+      this.loginErrorState.set(loginErrorMessage(error));
+      return false;
+    }
   }
 
   // Fetches the game from RAWG and saves it. Resolves with the existing id if already saved.

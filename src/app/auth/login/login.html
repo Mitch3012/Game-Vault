@@ -1,6 +1,10 @@
 <section class="mx-auto flex max-w-xl flex-col gap-4 p-4">
   <h2 class="text-xl font-bold tracking-widest text-slate-100 uppercase">Login</h2>
 
+  @if (loginError()) {
+    <app-error-banner [message]="loginError()" (dismiss)="onDismissError()" />
+  }
+
   <form
     class="flex flex-col gap-4 rounded-sm border-2 border-slate-700 bg-slate-900/60 p-4 shadow-[0_4px_16px_rgb(0_0_0/0.6),0_0_12px_rgb(182_255_0/0.12)]"
     [formGroup]="loginForm"
@@ -27,7 +31,7 @@
     </div>
 
     <div class="flex flex-wrap gap-3">
-      <button class="vault-btn" type="submit">Log in</button>
+      <button class="vault-btn" type="submit" [disabled]="loginForm.invalid || loginPending()">Log in</button>
     </div>
   </form>
 </section>

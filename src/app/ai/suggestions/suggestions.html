@@ -1,6 +1,6 @@
 <section class="flex flex-col gap-4" aria-labelledby="suggestions-heading">
   <div class="flex items-center justify-between gap-3">
-    <h2 id="suggestions-heading" class="text-lg font-bold text-slate-100">Suggested for you</h2>
+    <h2 id="suggestions-heading" class="text-lg font-bold break-words text-slate-100">{{ title() }}</h2>
     <button class="vault-btn" type="button" [disabled]="!canRefresh()" (click)="refresh.emit()">Refresh</button>
   </div>
 

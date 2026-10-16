@@ -12,3 +12,5 @@ export const LOGOUT_ERROR_MESSAGE = 'Could not log you out. Please try again.';
 export const LOAD_ERROR_MESSAGE = '[GameVaultCrudService] failed to load games';
 export const PERMISSION_DENIED_HINT =
   '[GameVaultCrudService] Firestore denied access to users/{uid}/games. Paste firestore.rules into the Firebase console (Firestore, Rules) so the vault can load.';
+
+export const VAULT_TITLE_FALLBACK = 'Your vault';

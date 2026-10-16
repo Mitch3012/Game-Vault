@@ -118,6 +118,35 @@ describe('Authservice', () => {
     });
   });
 
+  describe('userName', () => {
+    it('is empty until Firebase reports a user', () => {
+      expect(service.userName()).toBe('');
+    });
+
+    it('is the display name of the signed-in user', () => {
+      authState.next({ uid: 'u1', displayName: 'Sam' } as User);
+      expect(service.userName()).toBe('Sam');
+    });
+
+    it('is empty when nobody is signed in', () => {
+      authState.next(null);
+      expect(service.userName()).toBe('');
+    });
+
+    it('shows the name from signup straight away, although Firebase does not announce profile changes', async () => {
+      const user = { uid: 'u1', displayName: null } as unknown as User;
+      authState.next(user);
+      expect(service.userName()).toBe('');
+      createUser.mockResolvedValue({ user });
+      updateProfile.mockImplementation((target: User, profile: { displayName: string }) => {
+        (target as { displayName: string | null }).displayName = profile.displayName;
+        return Promise.resolve();
+      });
+      await service.signup('Sam', 'a@b.com', 'secret1');
+      expect(service.userName()).toBe('Sam');
+    });
+  });
+
   describe('signup', () => {
     it('creates the account, then saves the user name as the display name', async () => {
       createUser.mockResolvedValue(credential);

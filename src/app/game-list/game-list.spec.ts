@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 
 import { GameEntryWithId, NewGameEntry } from '../game-vault-interface';
 import { GameVaultService } from '../game-vault-service';
+import { ImportPreview } from '../transfer/transfer-interface';
 import { GameList } from './game-list';
 
 const saved = { id: 'doc1', rawgId: 1, title: 'Saved Game', genres: [], platforms: [], releaseDate: '' } as unknown as GameEntryWithId;
@@ -27,6 +28,16 @@ describe('GameList', () => {
     clearActionError: vi.fn(),
     removeGame: vi.fn(() => Promise.resolve()),
     addToVault: vi.fn(() => Promise.resolve('doc2')),
+    userName: signal('Sam'),
+    transferPreview: signal<ImportPreview | null>(null),
+    transferBusy: signal(false),
+    transferMessage: signal(''),
+    transferCanExport: signal(true),
+    transferCanImport: signal(true),
+    exportVault: vi.fn(),
+    chooseImportFile: vi.fn(() => Promise.resolve()),
+    confirmImport: vi.fn(() => Promise.resolve()),
+    cancelImport: vi.fn(),
     aiEnabled: signal(false),
     suggestions: signal<NewGameEntry[] | null>([]),
     suggestionsFailed: signal(false),
@@ -43,6 +54,13 @@ describe('GameList', () => {
     vault.clearActionError.mockClear();
     vault.removeGame.mockClear();
     vault.addToVault.mockClear();
+    vault.userName.set('Sam');
+    vault.transferPreview.set(null);
+    vault.transferMessage.set('');
+    vault.exportVault.mockClear();
+    vault.chooseImportFile.mockClear();
+    vault.confirmImport.mockClear();
+    vault.cancelImport.mockClear();
     vault.aiEnabled.set(false);
     vault.suggestions.set([]);
     vault.suggestionsFailed.set(false);
@@ -83,6 +101,88 @@ describe('GameList', () => {
     expect(vault.clearActionError).toHaveBeenCalled();
   });
 
+  describe('export and import', () => {
+    const panelButton = (label: string) =>
+      [...html().querySelectorAll<HTMLButtonElement>('app-transfer-panel button')].find((b) =>
+        b.textContent?.includes(label),
+      )!;
+    const preview: ImportPreview = { owner: 'Sam', total: 3, fresh: [suggested(11)], alreadyOwned: 2, skipped: 0 };
+
+    it('shows the panel under the vault heading and above the saved games', async () => {
+      vault.games.set([saved]);
+      await fixture.whenStable();
+      const panel = html().querySelector('app-transfer-panel')!;
+      const heading = html().querySelector('#vault-heading')!;
+      const card = html().querySelector('app-game-card')!;
+      expect(heading.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(panel.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('exports when Export is clicked', () => {
+      panelButton('Export vault').click();
+      expect(vault.exportVault).toHaveBeenCalledOnce();
+    });
+
+    it('disables Export when there is nothing to export', async () => {
+      vault.transferCanExport.set(false);
+      await fixture.whenStable();
+      expect(panelButton('Export vault').disabled).toBe(true);
+    });
+
+    it('hands a chosen file to the vault', () => {
+      const file = new File(['{}'], 'friend.json');
+      const picker = html().querySelector<HTMLInputElement>('app-transfer-panel input[type="file"]')!;
+      Object.defineProperty(picker, 'files', { value: [file], configurable: true });
+      picker.dispatchEvent(new Event('change'));
+      expect(vault.chooseImportFile).toHaveBeenCalledExactlyOnceWith(file);
+    });
+
+    it('confirms the import from the preview', async () => {
+      vault.transferPreview.set(preview);
+      await fixture.whenStable();
+      panelButton('Import 1 as Wishlist').click();
+      expect(vault.confirmImport).toHaveBeenCalledOnce();
+    });
+
+    it('cancels the import from the preview', async () => {
+      vault.transferPreview.set(preview);
+      await fixture.whenStable();
+      panelButton('Cancel').click();
+      expect(vault.cancelImport).toHaveBeenCalledOnce();
+    });
+
+    it('shows the result message', async () => {
+      vault.transferMessage.set('Imported 1 game as Wishlist.');
+      await fixture.whenStable();
+      expect(html().querySelector('app-transfer-panel [role="status"]')?.textContent).toContain('Imported 1 game');
+    });
+  });
+
+  describe('personal headings', () => {
+    it("names the vault after the user", () => {
+      expect(html().querySelector('#vault-heading')?.textContent).toContain("Sam's vault");
+    });
+
+    it('falls back to "Your vault" when there is no name', async () => {
+      vault.userName.set('');
+      await fixture.whenStable();
+      expect(html().querySelector('#vault-heading')?.textContent).toContain('Your vault');
+    });
+
+    it('names the suggestions after the user', async () => {
+      vault.aiEnabled.set(true);
+      await fixture.whenStable();
+      expect(html().querySelector('app-suggestions h2')?.textContent).toContain('Suggested for Sam');
+    });
+
+    it('falls back to "Suggested for you" when there is no name', async () => {
+      vault.userName.set('');
+      vault.aiEnabled.set(true);
+      await fixture.whenStable();
+      expect(html().querySelector('app-suggestions h2')?.textContent).toContain('Suggested for you');
+    });
+  });
+
   describe('AI suggestions', () => {
     const switchButton = () => html().querySelector<HTMLButtonElement>('[role="switch"]')!;
     const showSuggestions = async (games: NewGameEntry[]) => {
@@ -99,7 +199,7 @@ describe('GameList', () => {
     const isBefore = (first: Element, second: Element) =>
       !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
 
-    const vaultHeading = () => [...html().querySelectorAll('h2')].find((h) => h.textContent?.includes('Your vault'))!;
+    const vaultHeading = () => html().querySelector('#vault-heading')!;
 
     it('puts the AI switch at the top, above the saved games', async () => {
       vault.games.set([saved]);

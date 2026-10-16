@@ -21,6 +21,10 @@
     <app-error-banner [message]="actionError()" (dismiss)="onDismissError()" />
   }
 
+  @if (loginPromptVisible()) {
+    <app-login-prompt (dismiss)="onDismissLoginPrompt()" />
+  }
+
   @let items = results();
   @if (items === null) {
     <app-state-message text="Searching…" />

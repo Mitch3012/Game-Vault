@@ -13,6 +13,8 @@ import { suggestionsMessage } from '../suggestions-helpers';
   templateUrl: './suggestions.html',
 })
 export class Suggestions {
+  /** The heading, e.g. "Suggested for Sam". */
+  readonly title = input.required<string>();
   /** `null` = loading, `[]` = nothing to show. */
   readonly games = input.required<NewGameEntry[] | null>();
   readonly failed = input.required<boolean>();

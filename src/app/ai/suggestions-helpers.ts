@@ -4,6 +4,7 @@ import {
   SUGGESTIONS_FAILED_TEXT,
   SUGGESTIONS_LOADING_TEXT,
   SUGGESTIONS_NONE_TEXT,
+  SUGGESTIONS_TITLE_FALLBACK,
   SUGGESTION_COUNT,
 } from './suggestions.constants';
 
@@ -78,3 +79,7 @@ export const suggestionsMessage = (view: SuggestionsView): string => {
   if (view.games.length === 0) return SUGGESTIONS_NONE_TEXT;
   return '';
 };
+
+/** The suggestions heading, personal when we know the user's name. */
+export const suggestionsTitle = (userName: string): string =>
+  userName ? `Suggested for ${userName}` : SUGGESTIONS_TITLE_FALLBACK;

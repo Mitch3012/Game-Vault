@@ -7,6 +7,7 @@
 
   @if (aiEnabled()) {
     <app-suggestions
+      [title]="suggestionsHeading()"
       [games]="suggestions()"
       [failed]="suggestionsFailed()"
       [vaultEmpty]="suggestionsVaultEmpty()"
@@ -17,7 +18,19 @@
     />
   }
 
-  <h2 class="text-xl font-bold tracking-widest text-slate-100 uppercase">Your vault</h2>
+  <h2 id="vault-heading" class="text-xl font-bold tracking-widest break-words text-slate-100 uppercase">{{ vaultHeading() }}</h2>
+
+  <app-transfer-panel
+    [canExport]="canExport()"
+    [canImport]="canImport()"
+    [busy]="transferBusy()"
+    [preview]="transferPreview()"
+    [message]="transferMessage()"
+    (exportVault)="onExport()"
+    (fileChosen)="onFileChosen($event)"
+    (confirmImport)="onConfirmImport()"
+    (cancelImport)="onCancelImport()"
+  />
 
   @let items = games();
   @if (items === null) {

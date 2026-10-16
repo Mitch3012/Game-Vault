@@ -9,6 +9,7 @@ import { GameVaultCrudService } from './game-vault-crud-service';
 import { GameEntryChanges, GameEntryWithId, GameStatus } from './game-vault-interface';
 import { ADD_ERROR_MESSAGE, LOGOUT_ERROR_MESSAGE, REMOVE_ERROR_MESSAGE } from './game-vault.constants';
 import { RawgService } from './rawg-service';
+import { TransferService } from './transfer/transfer-service';
 import { Authservice } from './auth/auth-service';
 
 export const findByRawgId = (
@@ -23,8 +24,10 @@ export class GameVaultService {
   private readonly rawg = inject(RawgService);
   private readonly auth = inject(Authservice);
   private readonly suggestionsService = inject(SuggestionsService);
+  private readonly transfer = inject(TransferService);
   private readonly router = inject(Router);
   private readonly error = signal('');
+  private readonly loginPromptRequested = signal(false);
   private readonly loginFlow = createAuthFlow('login', loginErrorMessage);
   private readonly signupFlow = createAuthFlow('signup', signupErrorMessage);
 
@@ -44,6 +47,12 @@ export class GameVaultService {
 
   /** Where the app title links: home when signed in, the login page otherwise. */
   readonly homeRoute = computed(() => homeRouteFor(this.auth.signedIn()));
+
+  /** The signed-in user's name. `''` when signed out or when there is no name. */
+  readonly userName = this.auth.userName;
+
+  /** `true` while a logged-out visitor should be told to log in (after they try to add a game). */
+  readonly loginPromptVisible = computed(() => this.loginPromptRequested() && this.auth.signedIn() !== true);
 
   /** Message for the last failed login. `''` = no error. */
   readonly loginError = this.loginFlow.error;
@@ -69,8 +78,41 @@ export class GameVaultService {
   /** `true` when the vault has no games to base suggestions on. */
   readonly suggestionsVaultEmpty = this.suggestionsService.vaultEmpty;
 
+  /** What importing the chosen file would do. `null` = no file chosen. */
+  readonly transferPreview = this.transfer.preview;
+
+  /** `true` while an import is being saved. */
+  readonly transferBusy = this.transfer.busy;
+
+  /** The last export or import result or error. `''` = nothing to say. */
+  readonly transferMessage = this.transfer.message;
+
+  readonly transferCanExport = this.transfer.canExport;
+
+  readonly transferCanImport = this.transfer.canImport;
+
   setSearchTerm(term: string): void {
     this.searchTerm.set(term);
+  }
+
+  exportVault(): void {
+    this.transfer.exportVault();
+  }
+
+  chooseImportFile(file: File): Promise<void> {
+    return this.transfer.chooseFile(file);
+  }
+
+  confirmImport(): Promise<void> {
+    return this.transfer.confirmImport();
+  }
+
+  cancelImport(): void {
+    this.transfer.cancelImport();
+  }
+
+  dismissLoginPrompt(): void {
+    this.loginPromptRequested.set(false);
   }
 
   clearActionError(): void {
@@ -79,12 +121,13 @@ export class GameVaultService {
 
   /**
    * Saves the game. Resolves with its document id, or `undefined` (and sets `actionError`) on failure.
-   * Signed out: goes to the login form instead and resolves `undefined`. Sign-in unknown: does nothing.
+   * Signed out: shows the login prompt instead and resolves `undefined`. Sign-in unknown or vault still loading: does nothing.
    */
   async addToVault(rawgId: number, status: GameStatus = 'wishlist'): Promise<string | undefined> {
     const signedIn = this.auth.signedIn();
     if (signedIn === null) return undefined;
-    if (!signedIn) return this.goToLogin();
+    if (!signedIn) return this.showLoginPrompt();
+    if (this.games() === null) return undefined;
     return this.attempt(() => this.saveFromRawg(rawgId, status), ADD_ERROR_MESSAGE);
   }
 
@@ -129,8 +172,8 @@ export class GameVaultService {
     if (loggedOut) await this.router.navigateByUrl(LOGIN_ROUTE);
   }
 
-  private async goToLogin(): Promise<undefined> {
-    await this.router.navigateByUrl(LOGIN_ROUTE);
+  private showLoginPrompt(): undefined {
+    this.loginPromptRequested.set(true);
     return undefined;
   }
 

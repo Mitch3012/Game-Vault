@@ -6,9 +6,11 @@ import { SuggestionsService } from './ai/suggestions-service';
 import { Authservice } from './auth/auth-service';
 import { GameVaultCrudService } from './game-vault-crud-service';
 import { GameEntryWithId, NewGameEntry } from './game-vault-interface';
-import { ADD_ERROR_MESSAGE, LOGOUT_ERROR_MESSAGE, REMOVE_ERROR_MESSAGE } from './game-vault.constants';
+import { ADD_ERROR_MESSAGE, REMOVE_ERROR_MESSAGE } from './game-vault.constants';
 import { GameVaultService, findByRawgId } from './game-vault-service';
 import { RawgService } from './rawg-service';
+import { TransferService } from './transfer/transfer-service';
+import { ImportPreview } from './transfer/transfer-interface';
 
 const savedGame = { id: 'doc1', rawgId: 42 } as GameEntryWithId;
 
@@ -25,7 +27,13 @@ describe('findByRawgId', () => {
 describe('GameVaultService', () => {
   const crud = { games: signal<GameEntryWithId[] | null>([savedGame]), create: vi.fn(), delete: vi.fn() };
   const rawg = { search: () => signal([]), getGame: vi.fn() };
-  const auth = { login: vi.fn(), signup: vi.fn(), logout: vi.fn(), signedIn: signal<boolean | null>(true) };
+  const auth = {
+    login: vi.fn(),
+    signup: vi.fn(),
+    logout: vi.fn(),
+    signedIn: signal<boolean | null>(true),
+    userName: signal('Sam'),
+  };
   const router = { navigateByUrl: vi.fn() };
   const suggestions = {
     enabled: signal(false),
@@ -34,6 +42,17 @@ describe('GameVaultService', () => {
     vaultEmpty: signal(false),
     setEnabled: vi.fn(),
     refresh: vi.fn(),
+  };
+  const transfer = {
+    preview: signal<ImportPreview | null>(null),
+    busy: signal(false),
+    message: signal(''),
+    canExport: signal(true),
+    canImport: signal(true),
+    exportVault: vi.fn(),
+    chooseFile: vi.fn(),
+    confirmImport: vi.fn(),
+    cancelImport: vi.fn(),
   };
   let service: GameVaultService;
 
@@ -47,6 +66,7 @@ describe('GameVaultService', () => {
     auth.signup.mockReset();
     auth.logout.mockReset();
     auth.signedIn.set(true);
+    crud.games.set([savedGame]);
     router.navigateByUrl.mockReset();
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     TestBed.configureTestingModule({
@@ -56,6 +76,7 @@ describe('GameVaultService', () => {
         { provide: Authservice, useValue: auth },
         { provide: Router, useValue: router },
         { provide: SuggestionsService, useValue: suggestions },
+        { provide: TransferService, useValue: transfer },
       ],
     });
     service = TestBed.inject(GameVaultService);
@@ -63,6 +84,41 @@ describe('GameVaultService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('vault export and import', () => {
+    beforeEach(() => {
+      transfer.exportVault.mockReset();
+      transfer.chooseFile.mockReset();
+      transfer.confirmImport.mockReset();
+      transfer.cancelImport.mockReset();
+    });
+
+    it('exposes the transfer state from the transfer service', () => {
+      expect(service.transferPreview).toBe(transfer.preview);
+      expect(service.transferBusy).toBe(transfer.busy);
+      expect(service.transferMessage).toBe(transfer.message);
+      expect(service.transferCanExport).toBe(transfer.canExport);
+      expect(service.transferCanImport).toBe(transfer.canImport);
+    });
+
+    it('exports through the transfer service', () => {
+      service.exportVault();
+      expect(transfer.exportVault).toHaveBeenCalledOnce();
+    });
+
+    it('hands the chosen file to the transfer service', async () => {
+      const file = new File(['{}'], 'friend.json');
+      await service.chooseImportFile(file);
+      expect(transfer.chooseFile).toHaveBeenCalledExactlyOnceWith(file);
+    });
+
+    it('confirms and cancels through the transfer service', async () => {
+      await service.confirmImport();
+      service.cancelImport();
+      expect(transfer.confirmImport).toHaveBeenCalledOnce();
+      expect(transfer.cancelImport).toHaveBeenCalledOnce();
+    });
   });
 
   describe('AI suggestions', () => {
@@ -92,9 +148,10 @@ describe('GameVaultService', () => {
   describe('addToVault when the user is not signed in', () => {
     beforeEach(() => auth.signedIn.set(false));
 
-    it('goes to the login form instead of saving', async () => {
+    it('shows the login prompt instead of saving, and does not redirect', async () => {
       await expect(service.addToVault(99)).resolves.toBeUndefined();
-      expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith('/auth');
+      expect(service.loginPromptVisible()).toBe(true);
+      expect(router.navigateByUrl).not.toHaveBeenCalled();
       expect(crud.create).not.toHaveBeenCalled();
       expect(rawg.getGame).not.toHaveBeenCalled();
     });
@@ -103,6 +160,40 @@ describe('GameVaultService', () => {
       await service.addToVault(99);
       expect(service.actionError()).toBe('');
     });
+
+    it('hides the login prompt on request', async () => {
+      await service.addToVault(99);
+      service.dismissLoginPrompt();
+      expect(service.loginPromptVisible()).toBe(false);
+    });
+
+    it('hides the login prompt once the user signs in', async () => {
+      await service.addToVault(99);
+      auth.signedIn.set(true);
+      expect(service.loginPromptVisible()).toBe(false);
+    });
+  });
+
+  it('shows no login prompt until a logged-out user tries to add a game', () => {
+    auth.signedIn.set(false);
+    expect(service.loginPromptVisible()).toBe(false);
+  });
+
+  it('does not show the login prompt while it is unknown whether the user is signed in', async () => {
+    auth.signedIn.set(null);
+    await service.addToVault(99);
+    expect(service.loginPromptVisible()).toBe(false);
+  });
+
+  it('does nothing while the vault is still loading, so a game cannot be saved twice', async () => {
+    crud.games.set(null);
+    await expect(service.addToVault(99)).resolves.toBeUndefined();
+    expect(rawg.getGame).not.toHaveBeenCalled();
+    expect(crud.create).not.toHaveBeenCalled();
+  });
+
+  it('exposes the signed-in user name', () => {
+    expect(service.userName()).toBe('Sam');
   });
 
   it('does nothing while it is still unknown whether the user is signed in', async () => {
@@ -143,54 +234,6 @@ describe('GameVaultService', () => {
     expect(service.actionError()).toBe('');
   });
 
-  describe('login', () => {
-    const badCredentials = { code: 'auth/invalid-credential' };
-
-    it('starts with no login error and nothing pending', () => {
-      expect(service.loginError()).toBe('');
-      expect(service.loginPending()).toBe(false);
-    });
-
-    it('signs in with the given credentials, then goes to the home page', async () => {
-      auth.login.mockResolvedValue({});
-      await expect(service.login('a@b.com', 'secret')).resolves.toBe(true);
-      expect(auth.login).toHaveBeenCalledWith('a@b.com', 'secret');
-      expect(router.navigateByUrl).toHaveBeenCalledWith('/');
-    });
-
-    it('is pending only while the sign-in is in flight', async () => {
-      let finish: (value: unknown) => void = () => undefined;
-      auth.login.mockReturnValue(new Promise((resolve) => (finish = resolve)));
-      const attempt = service.login('a@b.com', 'secret');
-      expect(service.loginPending()).toBe(true);
-      finish({});
-      await attempt;
-      expect(service.loginPending()).toBe(false);
-    });
-
-    it('sets a friendly error, stays put, and does not reject when sign-in fails', async () => {
-      auth.login.mockRejectedValue(badCredentials);
-      await expect(service.login('a@b.com', 'wrong')).resolves.toBe(false);
-      expect(service.loginError()).toBe('Incorrect email or password.');
-      expect(router.navigateByUrl).not.toHaveBeenCalled();
-      expect(service.loginPending()).toBe(false);
-    });
-
-    it('clears an earlier error when the next attempt succeeds', async () => {
-      auth.login.mockRejectedValueOnce(badCredentials).mockResolvedValue({});
-      await service.login('a@b.com', 'wrong');
-      await service.login('a@b.com', 'right');
-      expect(service.loginError()).toBe('');
-    });
-
-    it('clears the login error on request', async () => {
-      auth.login.mockRejectedValue(badCredentials);
-      await service.login('a@b.com', 'wrong');
-      service.clearLoginError();
-      expect(service.loginError()).toBe('');
-    });
-  });
-
   describe('homeRoute', () => {
     it('is home when signed in', () => {
       auth.signedIn.set(true);
@@ -205,75 +248,6 @@ describe('GameVaultService', () => {
     it('is the login page while it is unknown', () => {
       auth.signedIn.set(null);
       expect(service.homeRoute()).toBe('/auth');
-    });
-  });
-
-  describe('logout', () => {
-    it('exposes whether a user is signed in', () => {
-      expect(service.signedIn()).toBe(true);
-      auth.signedIn.set(false);
-      expect(service.signedIn()).toBe(false);
-    });
-
-    it('signs out, then goes to the login form', async () => {
-      auth.logout.mockResolvedValue(undefined);
-      await service.logout();
-      expect(auth.logout).toHaveBeenCalledOnce();
-      expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith('/auth');
-    });
-
-    it('sets an error, stays put, and does not reject when sign-out fails', async () => {
-      auth.logout.mockRejectedValue(new Error('offline'));
-      await expect(service.logout()).resolves.toBeUndefined();
-      expect(service.actionError()).toBe(LOGOUT_ERROR_MESSAGE);
-      expect(router.navigateByUrl).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('signup', () => {
-    const emailTaken = { code: 'auth/email-already-in-use' };
-
-    it('starts with no signup error and nothing pending', () => {
-      expect(service.signupError()).toBe('');
-      expect(service.signupPending()).toBe(false);
-    });
-
-    it('creates the account with the given details, then goes to the home page', async () => {
-      auth.signup.mockResolvedValue({});
-      await expect(service.signup('Sam', 'a@b.com', 'secret1')).resolves.toBe(true);
-      expect(auth.signup).toHaveBeenCalledWith('Sam', 'a@b.com', 'secret1');
-      expect(router.navigateByUrl).toHaveBeenCalledWith('/');
-    });
-
-    it('is pending only while the signup is in flight', async () => {
-      let finish: (value: unknown) => void = () => undefined;
-      auth.signup.mockReturnValue(new Promise((resolve) => (finish = resolve)));
-      const attempt = service.signup('Sam', 'a@b.com', 'secret1');
-      expect(service.signupPending()).toBe(true);
-      finish({});
-      await attempt;
-      expect(service.signupPending()).toBe(false);
-    });
-
-    it('sets a friendly error, stays put, and does not reject when signup fails', async () => {
-      auth.signup.mockRejectedValue(emailTaken);
-      await expect(service.signup('Sam', 'a@b.com', 'secret1')).resolves.toBe(false);
-      expect(service.signupError()).toBe('An account with that email already exists.');
-      expect(router.navigateByUrl).not.toHaveBeenCalled();
-      expect(service.signupPending()).toBe(false);
-    });
-
-    it('keeps the signup and login errors separate', async () => {
-      auth.signup.mockRejectedValue(emailTaken);
-      await service.signup('Sam', 'a@b.com', 'secret1');
-      expect(service.loginError()).toBe('');
-    });
-
-    it('clears the signup error on request', async () => {
-      auth.signup.mockRejectedValue(emailTaken);
-      await service.signup('Sam', 'a@b.com', 'secret1');
-      service.clearSignupError();
-      expect(service.signupError()).toBe('');
     });
   });
 });

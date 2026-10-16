@@ -26,3 +26,21 @@ export const signedInFrom = (userId: string | null): boolean | null => (userId =
 
 /** Where the app title should go: home when signed in, the login page otherwise. */
 export const homeRouteFor = (signedIn: boolean | null): string => (signedIn ? HOME_ROUTE : LOGIN_ROUTE);
+
+/** Just the parts of a Firebase user the app reads. */
+export interface UserLike {
+  uid: string;
+  displayName?: string | null;
+}
+
+/** `undefined` = Firebase has not answered, `null` = nobody is signed in. */
+export type UserState = UserLike | null | undefined;
+
+/** `null` = not known yet, `''` = nobody is signed in, otherwise the uid. */
+export const userIdOf = (user: UserState): string | null => {
+  if (user === undefined) return null;
+  return user?.uid ?? '';
+};
+
+/** The user's display name, trimmed. `''` when there is none. */
+export const userNameOf = (user: UserState): string => (user?.displayName ?? '').trim();

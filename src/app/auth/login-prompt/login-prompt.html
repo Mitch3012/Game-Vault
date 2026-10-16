@@ -1,0 +1,19 @@
+<div
+  class="flex items-start justify-between gap-3 rounded-sm border-2 border-lime-400 bg-slate-900/80 p-4 text-slate-100 shadow-[0_0_12px_rgb(182_255_0/0.25)]"
+  role="status"
+>
+  <p>
+    <strong class="text-lime-400">{{ welcome }}</strong>
+    {{ message }}
+    <a class="text-lime-400 underline" [routerLink]="loginRoute">{{ linkText }}</a>
+    {{ suffix }}
+  </p>
+  <button
+    class="cursor-pointer rounded-sm px-2 text-slate-300 hover:text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
+    type="button"
+    aria-label="Dismiss"
+    (click)="dismiss.emit()"
+  >
+    ✕
+  </button>
+</div>

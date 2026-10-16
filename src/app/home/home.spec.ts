@@ -36,6 +36,8 @@ describe('Home', () => {
     setSearchTerm: vi.fn(),
     addToVault: vi.fn(() => Promise.resolve('doc1')),
     removeGame: vi.fn(() => Promise.resolve()),
+    loginPromptVisible: signal(false),
+    dismissLoginPrompt: vi.fn(),
   };
   let fixture: ComponentFixture<Home>;
   const html = () => fixture.nativeElement as HTMLElement;
@@ -47,6 +49,8 @@ describe('Home', () => {
     vault.clearActionError.mockClear();
     vault.setSearchTerm.mockClear();
     vault.addToVault.mockClear();
+    vault.loginPromptVisible.set(false);
+    vault.dismissLoginPrompt.mockClear();
     await TestBed.configureTestingModule({
       imports: [Home],
       providers: [provideRouter([]), { provide: GameVaultService, useValue: vault }],
@@ -96,6 +100,39 @@ describe('Home', () => {
     expect(html().querySelector('[role="alert"]')?.textContent).toContain('Could not add that game.');
     html().querySelector<HTMLButtonElement>('[role="alert"] button')?.click();
     expect(vault.clearActionError).toHaveBeenCalled();
+  });
+
+  describe('login prompt', () => {
+    it('is not shown by default', () => {
+      expect(html().querySelector('app-login-prompt')).toBeNull();
+    });
+
+    it('is shown, with a link to the login page, after a logged-out visitor tries to add a game', async () => {
+      vault.loginPromptVisible.set(true);
+      await fixture.whenStable();
+      expect(html().querySelector('app-login-prompt a')?.getAttribute('href')).toBe('/auth');
+    });
+
+    it('sits above the search results', async () => {
+      vault.searchResults.set([entry(1)]);
+      vault.loginPromptVisible.set(true);
+      await fixture.whenStable();
+      const prompt = html().querySelector('app-login-prompt')!;
+      const card = html().querySelector('app-game-card')!;
+      expect(prompt.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('is dismissed when its dismiss button is clicked', async () => {
+      vault.loginPromptVisible.set(true);
+      await fixture.whenStable();
+      html().querySelector<HTMLButtonElement>('app-login-prompt button')?.click();
+      expect(vault.dismissLoginPrompt).toHaveBeenCalledOnce();
+    });
+
+    it('is dismissed when the page is left', () => {
+      fixture.destroy();
+      expect(vault.dismissLoginPrompt).toHaveBeenCalled();
+    });
   });
 
   it('clears the action error when the page is left', () => {

@@ -36,14 +36,17 @@ A solo gamer who:
 | Live sync       | Changes appear straight away because the vault reads from Firestore in real time         |
 | Error feedback  | A failed add or remove shows a dismissible message on the page                           |
 | AI suggestions  | An optional switch on the game list page. When on, Gemini suggests games based on your vault, and each can be added in one click |
+| Share a vault   | Export your vault to a file (notes included) and import a friend's. New games are added to your Wishlist, with their notes labelled and the file checked first |
 
 ## User flows
 
-**Add a game:** Home, type a title, see results, click "Add to vault". The card switches to Edit and Remove.
+**Add a game:** Home, type a title, see results, click "Add to vault". The card switches to Edit and Remove. If you are not logged in, a notice with a link to the login page appears instead and nothing is saved.
 
 **Update a game:** Vault, Edit, change the status, rating or notes, Save. The app returns to the vault.
 
 **Remove a game:** Click Remove on any saved game, from the search results or the vault.
+
+**Share a vault:** Game list, Export vault, send the file to a friend. They open their Game list, Import vault, pick the file, check the preview, and confirm. Nothing is saved until they confirm.
 
 ## Scope
 

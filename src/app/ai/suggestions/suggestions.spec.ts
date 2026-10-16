@@ -33,6 +33,7 @@ describe('Suggestions', () => {
     fixture.componentRef.setInput('games', values.games);
     fixture.componentRef.setInput('failed', values.failed);
     fixture.componentRef.setInput('vaultEmpty', values.vaultEmpty);
+    fixture.componentRef.setInput('title', 'Suggested for Sam');
     fixture.componentRef.setInput('savedIds', new Map<number, string>());
     await fixture.whenStable();
   };
@@ -47,7 +48,7 @@ describe('Suggestions', () => {
 
   it('has a heading', async () => {
     await render();
-    expect(html().textContent).toContain('Suggested for you');
+    expect(html().querySelector('h2')?.textContent).toContain('Suggested for Sam');
   });
 
   it('shows a card per suggestion', async () => {

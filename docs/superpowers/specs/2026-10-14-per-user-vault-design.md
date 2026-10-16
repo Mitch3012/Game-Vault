@@ -10,7 +10,7 @@ signed-in user has their own separate list of saved games.
 | Who / action | Result |
 | --- | --- |
 | Logged out: search and browse on `/` | Works, no login needed |
-| Logged out: click **Add to vault** | Goes to the login page (`/auth`); nothing is saved |
+| Logged out: click **Add to vault** | Shows a "Welcome to Game Vault! You haven't logged in yet. Click here to log in" notice linking to the login page (`/auth`); nothing is saved. (Changed 2026-10-16: was an immediate redirect.) |
 | Logged out: open `/game-list` or `/form/:id` | Redirected to `/auth` |
 | Logged out: click the **Game Vault** title | Goes to `/auth` |
 | Signed in: click the **Game Vault** title | Goes to `/` |

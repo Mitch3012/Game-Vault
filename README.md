@@ -12,6 +12,7 @@ See [PRODUCT.md](PRODUCT.md) for what the app does and why.
 - Rate games from 1 to 5 and keep your own notes
 - Live updates: changes saved to Firestore show up immediately
 - Optional AI suggestions: switch them on from the game list page to get games picked from your vault (Gemini through Firebase AI Logic)
+- Share a vault: export it to a file, send it to a friend, and import theirs. New games arrive on your Wishlist with their notes labelled
 
 ## Tech stack
 
@@ -100,6 +101,7 @@ src/app/
   status-picker/        Status selector
   state-message/        Loading and empty-state text
   ai/                   AI suggestions: service, helpers, switch and suggestions components
+  transfer/             Export and import a vault as a file: helpers, services and the panel
   game-vault-service.ts       Facade: the only service components use
   game-vault-crud-service.ts  Firestore reads and writes
   rawg-service.ts             RAWG search and details

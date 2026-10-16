@@ -1,5 +1,12 @@
 import { HOME_ROUTE, LOGIN_ROUTE } from './auth.constants';
-import { homeRouteFor, loginErrorMessage, signedInFrom, signupErrorMessage } from './auth-helpers';
+import {
+  homeRouteFor,
+  loginErrorMessage,
+  signedInFrom,
+  signupErrorMessage,
+  userIdOf,
+  userNameOf,
+} from './auth-helpers';
 
 describe('loginErrorMessage', () => {
   it('explains bad credentials', () => {
@@ -76,5 +83,32 @@ describe('homeRouteFor', () => {
 
   it('is the login page while it is unknown', () => {
     expect(homeRouteFor(null)).toBe(LOGIN_ROUTE);
+  });
+});
+
+describe('userIdOf', () => {
+  it('is null while Firebase has not answered', () => {
+    expect(userIdOf(undefined)).toBeNull();
+  });
+
+  it('is an empty string when nobody is signed in', () => {
+    expect(userIdOf(null)).toBe('');
+  });
+
+  it('is the uid of the signed-in user', () => {
+    expect(userIdOf({ uid: 'u1' })).toBe('u1');
+  });
+});
+
+describe('userNameOf', () => {
+  it.each([[undefined], [null], [{ uid: 'u1' }], [{ uid: 'u1', displayName: null }], [{ uid: 'u1', displayName: '   ' }]])(
+    'is empty when there is no name (%j)',
+    (user) => {
+      expect(userNameOf(user)).toBe('');
+    },
+  );
+
+  it('is the trimmed display name', () => {
+    expect(userNameOf({ uid: 'u1', displayName: '  Sam ' })).toBe('Sam');
   });
 });

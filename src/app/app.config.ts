@@ -14,7 +14,7 @@ import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angul
 import { routes } from './app.routes';
 import { FirebaseStatusService } from './firebase-status-service';
 import { environment } from '../environments/environment';
-import { Auth, provideAuth, getAuth } from '@angular/fire/auth';
+import { provideAuth, getAuth } from '@angular/fire/auth';
 import { getAI, provideAI } from '@angular/fire/ai';
 import { buildAiOptions } from './ai/ai-service';
 

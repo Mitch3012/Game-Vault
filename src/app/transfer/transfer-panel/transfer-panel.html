@@ -1,0 +1,40 @@
+<section class="flex flex-col gap-3" aria-label="Share your vault with a friend">
+  <div class="flex flex-wrap gap-3">
+    <button class="vault-btn" type="button" [disabled]="!canExport()" (click)="exportVault.emit()">
+      Export vault
+    </button>
+    <button class="vault-btn" type="button" [disabled]="!canImport()" (click)="picker.click()">
+      Import vault
+    </button>
+    <input
+      #picker
+      class="hidden"
+      type="file"
+      accept=".json,application/json"
+      aria-label="Choose a vault file to import"
+      (change)="onFile(picker)"
+    />
+  </div>
+  <p class="text-xs text-slate-500">Exports include your name, ratings and notes, so check before you share.</p>
+
+  @if (preview()) {
+    <div
+      class="flex flex-col gap-3 rounded-sm border-2 border-slate-700 bg-slate-900/60 p-4 text-slate-100 shadow-[0_0_12px_rgb(182_255_0/0.12)]"
+    >
+      <p>{{ summary() }}</p>
+      <p class="text-xs text-slate-400">
+        New games are added to your Wishlist. Your friend's notes and rating are kept in the note, labelled with their name.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <button class="vault-btn" type="button" [disabled]="busy()" (click)="confirmImport.emit()">
+          {{ busy() ? 'Importing…' : importLabel() }}
+        </button>
+        <button class="vault-btn" type="button" [disabled]="busy()" (click)="cancelImport.emit()">Cancel</button>
+      </div>
+    </div>
+  }
+
+  @if (message()) {
+    <p class="text-sm text-lime-300" role="status">{{ message() }}</p>
+  }
+</section>

@@ -5,6 +5,7 @@ import {
   excludeSaved,
   parseTitles,
   suggestionsMessage,
+  suggestionsTitle,
   uniqueByRawgId,
   vaultStateOf,
 } from './suggestions-helpers';
@@ -144,5 +145,15 @@ describe('suggestionsMessage', () => {
 
   it('has no message when there are games to show', () => {
     expect(suggestionsMessage(view)).toBe('');
+  });
+});
+
+describe('suggestionsTitle', () => {
+  it("uses the user's name", () => {
+    expect(suggestionsTitle('Sam')).toBe('Suggested for Sam');
+  });
+
+  it('falls back to "Suggested for you" when there is no name', () => {
+    expect(suggestionsTitle('')).toBe('Suggested for you');
   });
 });

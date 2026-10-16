@@ -11,8 +11,9 @@ See [PRODUCT.md](PRODUCT.md) for what the app does and why.
 - Track each game's status: wishlist, playing, completed or dropped
 - Rate games from 1 to 5 and keep your own notes
 - Live updates: changes saved to Firestore show up immediately
-- Optional AI suggestions: switch them on from the game list page to get games picked from your vault (Gemini through Firebase AI Logic)
+- Optional AI suggestions: switch them on from the game list page to get games picked from your vault, each with a one-line reason, or describe what you feel like ("something cozy for a rainy day") and get matching games, even with an empty vault (Gemini through Firebase AI Logic)
 - Share a vault: export it to a file, send it to a friend, and import theirs. New games arrive on your Wishlist with their notes labelled
+- A "Contact the dev" button on every page with email, LinkedIn and GitHub links
 
 ## Tech stack
 
@@ -40,9 +41,11 @@ See [PRODUCT.md](PRODUCT.md) for what the app does and why.
 npm install
 ```
 
+> `.npmrc` sets `legacy-peer-deps` because `@angular/fire` 21 declares a peer dependency on Angular 21 while this app uses Angular 22. Remove it once AngularFire supports Angular 22.
+
 ### Configure
 
-The app reads its keys from `src/environments/environment.ts` (and `environment.development.ts` for dev builds). Fill in your own values:
+The app reads its keys from `src/environments/environment.ts` (and `environment.development.ts` for dev builds). Neither file is in the repo, so create them by copying [`src/environments/environment.example.ts`](src/environments/environment.example.ts) twice and filling in your own values:
 
 ```ts
 export const environment = {
@@ -81,6 +84,9 @@ Open <http://localhost:4200/>. The app reloads when you change a source file.
 | `npm run build` | Production build into `dist/`                 |
 | `npm run watch` | Development build that rebuilds on change     |
 | `npm test`      | Unit tests with Vitest                        |
+| `npm run e2e`   | End-to-end tests with Playwright              |
+| `npm run e2e:ui` | Playwright in its interactive UI mode        |
+| `npm run e2e:report` | Open the last Playwright HTML report     |
 
 ## Routes
 
@@ -102,6 +108,7 @@ src/app/
   state-message/        Loading and empty-state text
   ai/                   AI suggestions: service, helpers, switch and suggestions components
   transfer/             Export and import a vault as a file: helpers, services and the panel
+  contact/              The "Contact the dev" button and the developer details
   game-vault-service.ts       Facade: the only service components use
   game-vault-crud-service.ts  Firestore reads and writes
   rawg-service.ts             RAWG search and details
@@ -142,3 +149,15 @@ npm test
 ```
 
 Specs sit next to the code they cover (`*.spec.ts`).
+
+### End-to-end tests
+
+Playwright drives a real browser against the running app. One-time setup:
+
+```bash
+npx playwright install chromium
+```
+
+Then run `npm run e2e`. It reuses `npm start` if the app is already running on port 4200, and starts it otherwise. The tests are in [`e2e/`](e2e) and cover what a visitor can do without an account (search, the login notice, route protection, the Contact the dev panel). RAWG is faked, so they need no API quota. Failed runs keep a screenshot, a video and a trace in `test-results/`.
+
+Flows that need a signed-in user (the vault, export and import, AI suggestions) are covered by the unit tests. Running them end to end would need the Firebase emulators.

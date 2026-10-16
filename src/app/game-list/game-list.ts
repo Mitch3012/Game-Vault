@@ -24,11 +24,13 @@ export class GameList {
   protected readonly actionError = this.vault.actionError;
   protected readonly savedIds = computed(() => savedIdByRawgId(this.games()));
   protected readonly vaultHeading = computed(() => vaultTitle(this.vault.userName()));
-  protected readonly suggestionsHeading = computed(() => suggestionsTitle(this.vault.userName()));
+  protected readonly suggestionsHeading = computed(() => suggestionsTitle(this.vault.userName(), this.vault.suggestionsAsked()));
   protected readonly aiEnabled = this.vault.aiEnabled;
   protected readonly suggestions = this.vault.suggestions;
   protected readonly suggestionsFailed = this.vault.suggestionsFailed;
   protected readonly suggestionsVaultEmpty = this.vault.suggestionsVaultEmpty;
+  protected readonly suggestionsAsked = this.vault.suggestionsAsked;
+  protected readonly suggestionsReasons = this.vault.suggestionsReasons;
   protected readonly transferPreview = this.vault.transferPreview;
   protected readonly transferBusy = this.vault.transferBusy;
   protected readonly transferMessage = this.vault.transferMessage;
@@ -48,6 +50,14 @@ export class GameList {
 
   protected onToggleAi(on: boolean): void {
     this.vault.setAiEnabled(on);
+  }
+
+  protected onAsk(text: string): void {
+    this.vault.askSuggestions(text);
+  }
+
+  protected onClearAsk(): void {
+    this.vault.clearSuggestionsAsk();
   }
 
   protected onRefreshSuggestions(): void {

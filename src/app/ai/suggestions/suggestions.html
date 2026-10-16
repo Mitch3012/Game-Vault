@@ -1,17 +1,52 @@
 <section class="flex flex-col gap-4" aria-labelledby="suggestions-heading">
   <div class="flex items-center justify-between gap-3">
-    <h2 id="suggestions-heading" class="text-lg font-bold break-words text-slate-100">{{ title() }}</h2>
+    <h2 id="suggestions-heading" class="text-lg font-bold wrap-break-word text-slate-100">{{ title() }}</h2>
     <button class="vault-btn" type="button" [disabled]="!canRefresh()" (click)="refresh.emit()">Refresh</button>
   </div>
+
+  <form class="flex flex-wrap items-center gap-2" (submit)="onSubmit($event, box)">
+    <label class="sr-only" for="ask-box">Describe what you feel like playing</label>
+    <input
+      #box
+      id="ask-box"
+      class="min-w-0 flex-1 rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
+      type="text"
+      autocomplete="off"
+      [placeholder]="placeholder"
+      [maxLength]="maxLength"
+      [value]="asked()"
+    />
+    <button class="vault-btn" type="submit" [disabled]="!canAsk()">Ask</button>
+  </form>
+
+  <div class="flex flex-wrap gap-2">
+    @for (example of examples; track example) {
+      <app-ask-chip [label]="example" [disabled]="!canAsk()" (pick)="ask.emit($event)" />
+    }
+  </div>
+
+  @if (asked()) {
+    <p class="text-sm text-slate-300">
+      Showing picks for “{{ asked() }}”.
+      <button
+        class="cursor-pointer text-lime-400 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
+        type="button"
+        (click)="clearAsk.emit()"
+      >
+        Clear
+      </button>
+    </p>
+  }
 
   @if (message()) {
     <app-state-message [text]="message()" />
   } @else {
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       @for (entry of games() ?? []; track entry.rawgId) {
-        <app-game-card
+        <app-suggestion-card
           [game]="entry"
           [savedId]="savedIds().get(entry.rawgId) ?? null"
+          [reason]="reasons().get(entry.rawgId) ?? ''"
           (add)="add.emit($event)"
           (remove)="remove.emit($event)"
         />

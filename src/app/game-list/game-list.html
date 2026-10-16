@@ -11,14 +11,18 @@
       [games]="suggestions()"
       [failed]="suggestionsFailed()"
       [vaultEmpty]="suggestionsVaultEmpty()"
+      [asked]="suggestionsAsked()"
+      [reasons]="suggestionsReasons()"
       [savedIds]="savedIds()"
       (add)="onAdd($event)"
       (remove)="onRemove($event)"
       (refresh)="onRefreshSuggestions()"
+      (ask)="onAsk($event)"
+      (clearAsk)="onClearAsk()"
     />
   }
 
-  <h2 id="vault-heading" class="text-xl font-bold tracking-widest break-words text-slate-100 uppercase">{{ vaultHeading() }}</h2>
+  <h2 id="vault-heading" class="text-xl font-bold tracking-widest wrap-break-word text-slate-100 uppercase">{{ vaultHeading() }}</h2>
 
   <app-transfer-panel
     [canExport]="canExport()"

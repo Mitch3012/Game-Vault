@@ -3,6 +3,8 @@ import { provideRouter } from '@angular/router';
 
 import { NewGameEntry } from '../../game-vault-interface';
 import {
+  ASK_EXAMPLES,
+  ASK_PLACEHOLDER,
   SUGGESTIONS_EMPTY_VAULT_TEXT,
   SUGGESTIONS_FAILED_TEXT,
   SUGGESTIONS_LOADING_TEXT,
@@ -28,11 +30,21 @@ describe('Suggestions', () => {
   const refreshButton = () =>
     [...html().querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.includes('Refresh'))!;
 
-  const render = async (inputs: Partial<{ games: NewGameEntry[] | null; failed: boolean; vaultEmpty: boolean }> = {}) => {
-    const values = { games: [entry(1)], failed: false, vaultEmpty: false, ...inputs };
+  const render = async (
+    inputs: Partial<{
+      games: NewGameEntry[] | null;
+      failed: boolean;
+      vaultEmpty: boolean;
+      asked: string;
+      reasons: ReadonlyMap<number, string>;
+    }> = {},
+  ) => {
+    const values = { games: [entry(1)], failed: false, vaultEmpty: false, asked: '', reasons: new Map(), ...inputs };
     fixture.componentRef.setInput('games', values.games);
     fixture.componentRef.setInput('failed', values.failed);
     fixture.componentRef.setInput('vaultEmpty', values.vaultEmpty);
+    fixture.componentRef.setInput('asked', values.asked);
+    fixture.componentRef.setInput('reasons', values.reasons);
     fixture.componentRef.setInput('title', 'Suggested for Sam');
     fixture.componentRef.setInput('savedIds', new Map<number, string>());
     await fixture.whenStable();
@@ -53,7 +65,14 @@ describe('Suggestions', () => {
 
   it('shows a card per suggestion', async () => {
     await render({ games: [entry(1), entry(2)] });
-    expect(html().querySelectorAll('app-game-card').length).toBe(2);
+    expect(html().querySelectorAll('app-suggestion-card').length).toBe(2);
+  });
+
+  it("shows each suggestion's reason", async () => {
+    await render({ games: [entry(1), entry(2)], reasons: new Map([[2, 'Because you like co-op.']]) });
+    const cards = html().querySelectorAll('app-suggestion-card');
+    expect(cards[0].textContent).not.toContain('Because');
+    expect(cards[1].textContent).toContain('Because you like co-op.');
   });
 
   it('shows the loading message while suggestions load', async () => {
@@ -101,5 +120,76 @@ describe('Suggestions', () => {
   it('disables Refresh when the vault is empty', async () => {
     await render({ games: [], vaultEmpty: true });
     expect(refreshButton().disabled).toBe(true);
+  });
+
+  describe('asking in your own words', () => {
+    const box = () => html().querySelector<HTMLInputElement>('input[type="text"]')!;
+    const askButton = () =>
+      [...html().querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.trim() === 'Ask')!;
+    const chips = () => [...html().querySelectorAll<HTMLButtonElement>('app-ask-chip button')];
+
+    it('has a labelled box with an example in it', async () => {
+      await render();
+      expect(box().placeholder).toBe(ASK_PLACEHOLDER);
+      expect(html().querySelector('label[for="' + box().id + '"]')).not.toBeNull();
+    });
+
+    it('sends what was typed when the form is submitted', async () => {
+      await render();
+      const asked: string[] = [];
+      fixture.componentInstance.ask.subscribe((text) => asked.push(text));
+      box().value = 'something cozy for a rainy day';
+      html().querySelector('form')!.dispatchEvent(new Event('submit'));
+      expect(asked).toEqual(['something cozy for a rainy day']);
+    });
+
+    it('sends what was typed when Ask is clicked', async () => {
+      await render();
+      const asked: string[] = [];
+      fixture.componentInstance.ask.subscribe((text) => asked.push(text));
+      box().value = 'scary';
+      askButton().click();
+      expect(asked).toEqual(['scary']);
+    });
+
+    it('cannot be used while suggestions are loading', async () => {
+      await render({ games: null });
+      expect(askButton().disabled).toBe(true);
+      expect(chips().every((chip) => chip.disabled)).toBe(true);
+    });
+
+    it('offers the example requests as chips, and sends one when clicked', async () => {
+      await render();
+      expect(chips().map((chip) => chip.textContent?.trim())).toEqual([...ASK_EXAMPLES]);
+      const asked: string[] = [];
+      fixture.componentInstance.ask.subscribe((text) => asked.push(text));
+      chips()[1].click();
+      expect(asked).toEqual([ASK_EXAMPLES[1]]);
+    });
+
+    it('shows the current request in the box, with a way to clear it', async () => {
+      await render({ asked: 'rainy day' });
+      expect(box().value).toBe('rainy day');
+      expect(html().textContent).toContain('Showing picks for');
+      expect(html().textContent).toContain('rainy day');
+    });
+
+    it('clears the request when Clear is clicked', async () => {
+      await render({ asked: 'rainy day' });
+      let cleared = 0;
+      fixture.componentInstance.clearAsk.subscribe(() => cleared++);
+      [...html().querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent?.includes('Clear'))?.click();
+      expect(cleared).toBe(1);
+    });
+
+    it('shows no Clear option when nothing has been asked', async () => {
+      await render();
+      expect(html().textContent).not.toContain('Showing picks for');
+    });
+
+    it('still lets you ask when the vault is empty', async () => {
+      await render({ games: [], vaultEmpty: true });
+      expect(askButton().disabled).toBe(false);
+    });
   });
 });

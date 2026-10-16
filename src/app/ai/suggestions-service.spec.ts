@@ -2,28 +2,11 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { GameVaultCrudService } from '../game-vault-crud-service';
-import { GameEntryWithId, NewGameEntry } from '../game-vault-interface';
+import { GameEntryWithId } from '../game-vault-interface';
 import { RawgService } from '../rawg-service';
 import { AiService } from './ai-service';
 import { SuggestionsService } from './suggestions-service';
-
-const entry = (rawgId: number, title = `Game ${rawgId}`): NewGameEntry => ({
-  rawgId,
-  title,
-  coverUrl: '',
-  platforms: [],
-  genres: [],
-  releaseDate: '',
-  rating: null,
-  status: 'wishlist',
-  notes: '',
-});
-
-const saved = (rawgId: number, title: string): GameEntryWithId => ({
-  ...entry(rawgId, title),
-  id: `doc${rawgId}`,
-  addedAt: 0,
-});
+import { entry, saved } from './suggestions-test-data';
 
 describe('SuggestionsService', () => {
   const games = signal<GameEntryWithId[] | null>([]);

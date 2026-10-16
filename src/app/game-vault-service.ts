@@ -78,6 +78,12 @@ export class GameVaultService {
   /** `true` when the vault has no games to base suggestions on. */
   readonly suggestionsVaultEmpty = this.suggestionsService.vaultEmpty;
 
+  /** The user's current request to the AI, cleaned up. `''` = none. */
+  readonly suggestionsAsked = this.suggestionsService.asked;
+
+  /** The AI's reason for each suggestion, by RAWG id. */
+  readonly suggestionsReasons = this.suggestionsService.reasons;
+
   /** What importing the chosen file would do. `null` = no file chosen. */
   readonly transferPreview = this.transfer.preview;
 
@@ -146,6 +152,14 @@ export class GameVaultService {
 
   refreshSuggestions(): void {
     this.suggestionsService.refresh();
+  }
+
+  askSuggestions(text: string): void {
+    this.suggestionsService.ask(text);
+  }
+
+  clearSuggestionsAsk(): void {
+    this.suggestionsService.clearAsk();
   }
 
   clearLoginError(): void {

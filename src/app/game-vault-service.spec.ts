@@ -40,8 +40,12 @@ describe('GameVaultService', () => {
     suggestions: signal<NewGameEntry[] | null>([]),
     failed: signal(false),
     vaultEmpty: signal(false),
+    asked: signal(''),
+    reasons: signal<ReadonlyMap<number, string>>(new Map()),
     setEnabled: vi.fn(),
     refresh: vi.fn(),
+    ask: vi.fn(),
+    clearAsk: vi.fn(),
   };
   const transfer = {
     preview: signal<ImportPreview | null>(null),
@@ -59,6 +63,8 @@ describe('GameVaultService', () => {
   beforeEach(() => {
     suggestions.setEnabled.mockReset();
     suggestions.refresh.mockReset();
+    suggestions.ask.mockReset();
+    suggestions.clearAsk.mockReset();
     crud.create.mockReset();
     crud.delete.mockReset();
     rawg.getGame.mockReset();
@@ -127,11 +133,20 @@ describe('GameVaultService', () => {
       expect(service.suggestions).toBe(suggestions.suggestions);
       expect(service.suggestionsFailed).toBe(suggestions.failed);
       expect(service.suggestionsVaultEmpty).toBe(suggestions.vaultEmpty);
+      expect(service.suggestionsAsked).toBe(suggestions.asked);
+      expect(service.suggestionsReasons).toBe(suggestions.reasons);
     });
 
     it('turns the AI on and off through the suggestions service', () => {
       service.setAiEnabled(true);
       expect(suggestions.setEnabled).toHaveBeenCalledExactlyOnceWith(true);
+    });
+
+    it('asks and clears the request through the suggestions service', () => {
+      service.askSuggestions('something cozy');
+      service.clearSuggestionsAsk();
+      expect(suggestions.ask).toHaveBeenCalledExactlyOnceWith('something cozy');
+      expect(suggestions.clearAsk).toHaveBeenCalledOnce();
     });
 
     it('refreshes through the suggestions service', () => {

@@ -35,8 +35,9 @@ A solo gamer who:
 | Edit and remove | Edit details from the vault or remove a game from search or the list                     |
 | Live sync       | Changes appear straight away because the vault reads from Firestore in real time         |
 | Error feedback  | A failed add or remove shows a dismissible message on the page                           |
-| AI suggestions  | An optional switch on the game list page. When on, Gemini suggests games based on your vault, and each can be added in one click |
+| AI suggestions  | An optional switch on the game list page. When on, Gemini suggests games based on your vault, each with a short reason, and each can be added in one click. You can also type what you feel like ("something cozy for a rainy day") to get matching games, even with an empty vault |
 | Share a vault   | Export your vault to a file (notes included) and import a friend's. New games are added to your Wishlist, with their notes labelled and the file checked first |
+| Contact the dev | A button on every page that opens the developer's email, LinkedIn and GitHub |
 
 ## User flows
 

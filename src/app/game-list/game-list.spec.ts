@@ -1,4 +1,3 @@
-import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
@@ -6,6 +5,7 @@ import { GameEntryWithId, NewGameEntry } from '../game-vault-interface';
 import { GameVaultService } from '../game-vault-service';
 import { ImportPreview } from '../transfer/transfer-interface';
 import { GameList } from './game-list';
+import { createVaultMock, resetVaultMock } from './game-list-test-vault';
 
 const saved = { id: 'doc1', rawgId: 1, title: 'Saved Game', genres: [], platforms: [], releaseDate: '' } as unknown as GameEntryWithId;
 
@@ -22,51 +22,12 @@ const suggested = (rawgId: number): NewGameEntry => ({
 });
 
 describe('GameList', () => {
-  const vault = {
-    games: signal<GameEntryWithId[] | null>(null),
-    actionError: signal(''),
-    clearActionError: vi.fn(),
-    removeGame: vi.fn(() => Promise.resolve()),
-    addToVault: vi.fn(() => Promise.resolve('doc2')),
-    userName: signal('Sam'),
-    transferPreview: signal<ImportPreview | null>(null),
-    transferBusy: signal(false),
-    transferMessage: signal(''),
-    transferCanExport: signal(true),
-    transferCanImport: signal(true),
-    exportVault: vi.fn(),
-    chooseImportFile: vi.fn(() => Promise.resolve()),
-    confirmImport: vi.fn(() => Promise.resolve()),
-    cancelImport: vi.fn(),
-    aiEnabled: signal(false),
-    suggestions: signal<NewGameEntry[] | null>([]),
-    suggestionsFailed: signal(false),
-    suggestionsVaultEmpty: signal(false),
-    setAiEnabled: vi.fn(),
-    refreshSuggestions: vi.fn(),
-  };
+  const vault = createVaultMock();
   let fixture: ComponentFixture<GameList>;
   const html = () => fixture.nativeElement as HTMLElement;
 
   beforeEach(async () => {
-    vault.games.set(null);
-    vault.actionError.set('');
-    vault.clearActionError.mockClear();
-    vault.removeGame.mockClear();
-    vault.addToVault.mockClear();
-    vault.userName.set('Sam');
-    vault.transferPreview.set(null);
-    vault.transferMessage.set('');
-    vault.exportVault.mockClear();
-    vault.chooseImportFile.mockClear();
-    vault.confirmImport.mockClear();
-    vault.cancelImport.mockClear();
-    vault.aiEnabled.set(false);
-    vault.suggestions.set([]);
-    vault.suggestionsFailed.set(false);
-    vault.suggestionsVaultEmpty.set(false);
-    vault.setAiEnabled.mockClear();
-    vault.refreshSuggestions.mockClear();
+    resetVaultMock(vault);
     await TestBed.configureTestingModule({
       imports: [GameList],
       providers: [provideRouter([]), { provide: GameVaultService, useValue: vault }],

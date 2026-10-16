@@ -1,0 +1,41 @@
+<div class="relative">
+  <button
+    class="vault-btn"
+    type="button"
+    aria-controls="contact-panel"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()"
+  >
+    {{ buttonLabel }}
+  </button>
+
+  @if (open()) {
+    <section
+      id="contact-panel"
+      class="absolute left-0 z-10 mt-2 flex w-72 max-w-[90vw] flex-col gap-3 rounded-sm border-2 border-slate-700 bg-slate-900 p-4 text-slate-100 shadow-[0_4px_16px_rgb(0_0_0/0.6),0_0_12px_rgb(182_255_0/0.12)]"
+      aria-label="Contact the developer"
+    >
+      <h2 class="text-lg font-bold text-lime-400">{{ heading }}</h2>
+      <p class="text-sm text-slate-300">{{ intro }}</p>
+      <ul class="flex flex-col gap-2 text-sm">
+        <li>
+          <span class="text-slate-400">Email</span><br />
+          <a class="break-all text-lime-400 underline" [href]="emailLink">{{ email }}</a>
+        </li>
+        <li>
+          <span class="text-slate-400">LinkedIn</span><br />
+          <a class="text-lime-400 underline" [href]="linkedInUrl" target="_blank" [rel]="externalRel">
+            linkedin.com/in/mitch3012jcm
+          </a>
+        </li>
+        <li>
+          <span class="text-slate-400">GitHub</span><br />
+          <a class="text-lime-400 underline" [href]="gitHubUrl" target="_blank" [rel]="externalRel">
+            github.com/Mitch3012
+          </a>
+        </li>
+      </ul>
+      <button class="vault-btn self-start" type="button" (click)="close()">Close</button>
+    </section>
+  }
+</div>

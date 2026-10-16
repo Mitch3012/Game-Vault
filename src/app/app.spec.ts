@@ -41,6 +41,14 @@ describe('App', () => {
     expect(vault.logout).toHaveBeenCalledOnce();
   });
 
+  it.each([[false], [null], [true]])('shows the "Contact the dev" button when signed in is %s', async (signedIn) => {
+    vault.signedIn.set(signedIn);
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('app-contact-dev button')?.textContent).toContain('Contact the dev');
+  });
+
   it('links the title to the login page when signed out', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();

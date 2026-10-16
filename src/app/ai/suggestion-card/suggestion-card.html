@@ -1,0 +1,14 @@
+<div class="flex flex-col gap-2">
+  <app-game-card
+    [game]="game()"
+    [savedId]="savedId()"
+    (add)="add.emit($event)"
+    (remove)="remove.emit($event)"
+  />
+  @if (reason()) {
+    <p class="px-1 text-sm text-slate-300 italic" data-testid="reason">
+      “{{ reason() }}”
+      <span class="text-xs text-lime-400 not-italic">· AI's take</span>
+    </p>
+  }
+</div>

@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { GameVaultService } from '../../game-vault-service';
 import { LoginComponent } from './login.component';
@@ -32,7 +33,7 @@ describe('LoginComponent', () => {
     vault.login.mockClear();
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
-      providers: [{ provide: GameVaultService, useValue: vault }],
+      providers: [{ provide: GameVaultService, useValue: vault }, provideRouter([])],
     }).compileComponents();
     fixture = TestBed.createComponent(LoginComponent);
     await fixture.whenStable();
@@ -40,6 +41,16 @@ describe('LoginComponent', () => {
 
   it('should create', () => {
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('links to the signup page', () => {
+    expect(html().querySelector('a')?.getAttribute('href')).toBe('/signup');
+  });
+
+  it('invites new users to sign up at the bottom of the form', () => {
+    const footer = html().querySelector('section > p:last-child');
+    expect(footer?.textContent).toContain('New to Game Vault?');
+    expect(footer?.querySelector('a')?.textContent).toContain('Sign up');
   });
 
   it('shows no error banner when there is no login error', () => {

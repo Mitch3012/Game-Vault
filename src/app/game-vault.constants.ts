@@ -5,3 +5,4 @@ export const MAX_RATING = 5;
 
 export const ADD_ERROR_MESSAGE = 'Could not add that game. Please try again.';
 export const REMOVE_ERROR_MESSAGE = 'Could not remove that game. Please try again.';
+export const LOGOUT_ERROR_MESSAGE = 'Could not log you out. Please try again.';

@@ -6,7 +6,8 @@ import {
 } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+// 1. Import 'getApp' from '@angular/fire/app'
+import { initializeApp, provideFirebaseApp, getApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angular/fire/app-check';
 
@@ -21,12 +22,18 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(),
     provideFirebaseApp(() => initializeApp(environment)),
-    provideAppCheck(() =>
-      initializeAppCheck(undefined, {
+    provideAppCheck(() => {
+      // 2. (Optional) Enable debug token for local testing on localhost
+      if (typeof window !== 'undefined' && location.hostname === 'localhost') {
+        (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+      }
+
+      // 3. Use getApp() here instead of undefined
+      return initializeAppCheck(getApp(), {
         provider: new ReCaptchaV3Provider(environment.recaptchaSiteKey),
         isTokenAutoRefreshEnabled: true,
-      }),
-    ),
+      });
+    }),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideAppInitializer(() => {

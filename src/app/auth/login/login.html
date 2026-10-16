@@ -34,4 +34,9 @@
       <button class="vault-btn" type="submit" [disabled]="loginForm.invalid || loginPending()">Log in</button>
     </div>
   </form>
+
+  <p class="text-sm text-slate-300">
+    New to Game Vault?
+    <a class="text-lime-400 underline" [routerLink]="signupRoute">Sign up</a>
+  </p>
 </section>

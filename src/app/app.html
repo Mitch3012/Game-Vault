@@ -1,3 +1,9 @@
+@if (signedIn()) {
+  <div class="flex justify-end p-2">
+    <button class="vault-btn" type="button" (click)="onLogout()">Log out</button>
+  </div>
+}
+
 <h1
   class="flicker text-slate-300 text-center m-1.25 font-extrabold text-4xl uppercase tracking-widest [text-shadow:0_0_8px_var(--color-vault-acid),0_0_16px_var(--color-vault-blood)]"
 >

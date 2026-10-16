@@ -1,13 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { ErrorBanner } from '../../error-banner/error-banner';
 import { GameVaultService } from '../../game-vault-service';
+import { SIGNUP_ROUTE } from '../auth.constants';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, ErrorBanner],
+  imports: [ReactiveFormsModule, ErrorBanner, RouterLink],
   styleUrl: './login.css',
   templateUrl: './login.html',
 })
@@ -16,6 +18,7 @@ export class LoginComponent {
 
   readonly loginError = this.gameVault.loginError;
   readonly loginPending = this.gameVault.loginPending;
+  readonly signupRoute = SIGNUP_ROUTE;
 
   loginForm = new FormGroup({
     email: new FormControl('', {

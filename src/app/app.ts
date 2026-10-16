@@ -1,5 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
+import { GameVaultService } from './game-vault-service';
 
 @Component({
   selector: 'app-root',
@@ -8,5 +10,11 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('game-vault');
+  private readonly vault = inject(GameVaultService);
+
+  protected readonly signedIn = this.vault.signedIn;
+
+  protected onLogout(): void {
+    void this.vault.logout();
+  }
 }

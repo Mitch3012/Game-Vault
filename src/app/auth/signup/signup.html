@@ -1,5 +1,9 @@
 <section class="mx-auto flex max-w-xl flex-col gap-4 p-4">
-  <h2 class="text-xl font-bold tracking-widest text-slate-100 uppercase">SignUp</h2>
+  <h2 class="text-xl font-bold tracking-widest text-slate-100 uppercase">Sign up</h2>
+
+  @if (signupError()) {
+    <app-error-banner [message]="signupError()" (dismiss)="onDismissError()" />
+  }
 
   <form
     class="flex flex-col gap-4 rounded-sm border-2 border-slate-700 bg-slate-900/60 p-4 shadow-[0_4px_16px_rgb(0_0_0/0.6),0_0_12px_rgb(182_255_0/0.12)]"
@@ -33,11 +37,18 @@
         class="rounded-sm border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-400"
         type="password"
         formControlName="password"
+        aria-describedby="password-hint"
       />
+      <p id="password-hint" class="text-xs text-slate-400">At least {{ minPasswordLength }} characters.</p>
     </div>
 
     <div class="flex flex-wrap gap-3">
-      <button class="vault-btn" type="submit">Sign Up</button>
+      <button class="vault-btn" type="submit" [disabled]="signupForm.invalid || signupPending()">Sign up</button>
     </div>
   </form>
+
+  <p class="text-sm text-slate-300">
+    Already have an account?
+    <a class="text-lime-400 underline" [routerLink]="loginRoute">Log in</a>
+  </p>
 </section>

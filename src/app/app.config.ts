@@ -15,6 +15,8 @@ import { routes } from './app.routes';
 import { FirebaseStatusService } from './firebase-status-service';
 import { environment } from '../environments/environment';
 import { Auth, provideAuth, getAuth } from '@angular/fire/auth';
+import { getAI, provideAI } from '@angular/fire/ai';
+import { buildAiOptions } from './ai/ai-service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -36,6 +38,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
+    provideAI(() => getAI(getApp(), buildAiOptions())),
     provideAppInitializer(() => {
       inject(FirebaseStatusService).logConnection();
     }),

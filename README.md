@@ -11,6 +11,7 @@ See [PRODUCT.md](PRODUCT.md) for what the app does and why.
 - Track each game's status: wishlist, playing, completed or dropped
 - Rate games from 1 to 5 and keep your own notes
 - Live updates: changes saved to Firestore show up immediately
+- Optional AI suggestions: switch them on from the game list page to get games picked from your vault (Gemini through Firebase AI Logic)
 
 ## Tech stack
 
@@ -19,6 +20,7 @@ See [PRODUCT.md](PRODUCT.md) for what the app does and why.
 | Framework | Angular 22 (standalone components, signals, signal forms)  |
 | Data      | Firebase Firestore via `@angular/fire`, with App Check     |
 | Game data | RAWG API, loaded with `httpResource`                       |
+| AI        | Gemini through Firebase AI Logic (`@angular/fire/ai`)      |
 | Styling   | Tailwind CSS 4                                             |
 | Tests     | Vitest + jsdom, run through `ng test`                      |
 
@@ -29,6 +31,7 @@ See [PRODUCT.md](PRODUCT.md) for what the app does and why.
 - Node.js and npm (the project pins `npm@11.13.0`)
 - A Firebase project with Firestore enabled
 - A free RAWG API key from <https://rawg.io/apidocs>
+- For AI suggestions: enable **Firebase AI Logic** (Gemini Developer API) for your project in the Firebase console
 
 ### Install
 
@@ -57,6 +60,10 @@ export const environment = {
 
 > Do not commit real keys to a public repository. Firebase web keys are designed to be public but must be locked down with Firestore security rules and App Check. Your RAWG key is a secret, so keep it out of public source control.
 
+### Firestore rules
+
+Paste [firestore.rules](firestore.rules) into the Firebase console (Firestore, Rules). Until you do, the vault cannot read or write `users/{uid}/games` and will look empty.
+
 ### Run
 
 ```bash
@@ -79,8 +86,8 @@ Open <http://localhost:4200/>. The app reloads when you change a source file.
 | Path            | Page                                            |
 | --------------- | ----------------------------------------------- |
 | `/`             | Home: search RAWG and add games                 |
-| `/game-list`    | Your vault: every saved game                    |
-| `/form/:id`     | Edit a saved game's status, rating and notes    |
+| `/game-list`    | Your vault: every saved game (sign-in required) |
+| `/form/:id`     | Edit a saved game (sign-in required)            |
 
 ## Project structure
 
@@ -92,6 +99,7 @@ src/app/
   game-card/            Card used by both lists
   status-picker/        Status selector
   state-message/        Loading and empty-state text
+  ai/                   AI suggestions: service, helpers, switch and suggestions components
   game-vault-service.ts       Facade: the only service components use
   game-vault-crud-service.ts  Firestore reads and writes
   rawg-service.ts             RAWG search and details
@@ -110,7 +118,7 @@ The code follows the rules in [CLAUDE.md](../CLAUDE.md). The main ones:
 
 ## Data model
 
-Games are stored in the Firestore `games` collection:
+Each user's games are stored in the Firestore subcollection `users/{uid}/games`:
 
 | Field         | Type                                                    |
 | ------------- | ------------------------------------------------------- |

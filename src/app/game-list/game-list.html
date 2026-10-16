@@ -1,9 +1,23 @@
 <section class="mx-auto flex max-w-5xl flex-col gap-4 p-4">
-  <h2 class="text-xl font-bold tracking-widest text-slate-100 uppercase">Your vault</h2>
-
   @if (actionError()) {
     <app-error-banner [message]="actionError()" (dismiss)="onDismissError()" />
   }
+
+  <app-ai-toggle [enabled]="aiEnabled()" (toggle)="onToggleAi($event)" />
+
+  @if (aiEnabled()) {
+    <app-suggestions
+      [games]="suggestions()"
+      [failed]="suggestionsFailed()"
+      [vaultEmpty]="suggestionsVaultEmpty()"
+      [savedIds]="savedIds()"
+      (add)="onAdd($event)"
+      (remove)="onRemove($event)"
+      (refresh)="onRefreshSuggestions()"
+    />
+  }
+
+  <h2 class="text-xl font-bold tracking-widest text-slate-100 uppercase">Your vault</h2>
 
   @let items = games();
   @if (items === null) {

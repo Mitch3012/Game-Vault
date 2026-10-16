@@ -1,6 +1,8 @@
 import {
   DEFAULT_LOGIN_ERROR,
   DEFAULT_SIGNUP_ERROR,
+  HOME_ROUTE,
+  LOGIN_ROUTE,
   LOGIN_ERROR_MESSAGES,
   SIGNUP_ERROR_MESSAGES,
 } from './auth.constants';
@@ -18,3 +20,9 @@ export const loginErrorMessage = messageFor(LOGIN_ERROR_MESSAGES, DEFAULT_LOGIN_
 
 /** Friendly message for a failed signup. Unknown or code-less errors get the default. */
 export const signupErrorMessage = messageFor(SIGNUP_ERROR_MESSAGES, DEFAULT_SIGNUP_ERROR);
+
+/** `null` = the user is not known yet, `''` = nobody is signed in, otherwise a uid. */
+export const signedInFrom = (userId: string | null): boolean | null => (userId === null ? null : userId !== '');
+
+/** Where the app title should go: home when signed in, the login page otherwise. */
+export const homeRouteFor = (signedIn: boolean | null): string => (signedIn ? HOME_ROUTE : LOGIN_ROUTE);

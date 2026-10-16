@@ -1,4 +1,5 @@
-export const LOGIN_SUCCESS_ROUTE = '/';
+export const HOME_ROUTE = '/';
+export const LOGIN_SUCCESS_ROUTE = HOME_ROUTE;
 export const LOGIN_ROUTE = '/auth';
 export const SIGNUP_ROUTE = '/signup';
 

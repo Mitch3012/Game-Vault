@@ -1,4 +1,4 @@
-import { Injector, InjectionToken, Service, Signal, inject, runInInjectionContext } from '@angular/core';
+import { Injector, InjectionToken, Service, Signal, computed, inject, runInInjectionContext } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   Auth,
@@ -11,6 +11,8 @@ import {
   updateProfile,
 } from '@angular/fire/auth';
 import { Observable, map } from 'rxjs';
+
+import { signedInFrom } from './auth-helpers';
 
 export type SignInFn = (auth: Auth, email: string, password: string) => Promise<UserCredential>;
 export type UpdateProfileFn = (user: User, profile: { displayName: string }) => Promise<void>;
@@ -57,11 +59,14 @@ export class Authservice {
   private readonly authState = inject(AUTH_STATE);
   private readonly signOutOfFirebase = inject(SIGN_OUT);
 
-  /** Whether a user is signed in. `null` = Firebase has not said yet. */
-  readonly signedIn: Signal<boolean | null> = toSignal(
-    this.authState(this.auth).pipe(map((user) => user !== null)),
+  /** The signed-in user's uid. `null` = Firebase has not said yet, `''` = nobody is signed in. */
+  readonly userId: Signal<string | null> = toSignal(
+    this.authState(this.auth).pipe(map((user) => user?.uid ?? '')),
     { initialValue: null },
   );
+
+  /** Whether a user is signed in. `null` = Firebase has not said yet. */
+  readonly signedIn: Signal<boolean | null> = computed(() => signedInFrom(this.userId()));
 
   login(email: string, password: string): Promise<UserCredential> {
     return this.inContext(() => this.signIn(this.auth, email, password));

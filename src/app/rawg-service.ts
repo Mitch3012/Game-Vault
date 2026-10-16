@@ -42,6 +42,19 @@ export class RawgService {
     return toNewGameEntry(game);
   }
 
+  /** LOOKUP. Resolves with the best match for a title, or `undefined` for a blank title, no match or any error. */
+  async findByTitle(title: string): Promise<NewGameEntry | undefined> {
+    const trimmed = title.trim();
+    if (!trimmed) return undefined;
+    try {
+      const response = await firstValueFrom(this.http.get<RawgListResponse>(buildSearchUrl(trimmed, 1)));
+      return toNewGameEntries(response.results)[0];
+    } catch (error) {
+      console.error('[RawgService] findByTitle failed', trimmed, error);
+      return undefined;
+    }
+  }
+
   // Returning undefined tells httpResource to stay idle (no request for an empty term).
   private searchRequest(term: string): string | undefined {
     const trimmed = term.trim();

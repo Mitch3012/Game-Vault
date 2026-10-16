@@ -1,4 +1,5 @@
-import { loginErrorMessage, signupErrorMessage } from './auth-helpers';
+import { HOME_ROUTE, LOGIN_ROUTE } from './auth.constants';
+import { homeRouteFor, loginErrorMessage, signedInFrom, signupErrorMessage } from './auth-helpers';
 
 describe('loginErrorMessage', () => {
   it('explains bad credentials', () => {
@@ -47,5 +48,33 @@ describe('signupErrorMessage', () => {
 
   it.each([[new Error('boom')], [null], [undefined]])('falls back to the default without a code (%s)', (error) => {
     expect(signupErrorMessage(error)).toBe('Could not sign you up. Please try again.');
+  });
+});
+
+describe('signedInFrom', () => {
+  it('is null while the user is unknown', () => {
+    expect(signedInFrom(null)).toBeNull();
+  });
+
+  it('is false when signed out', () => {
+    expect(signedInFrom('')).toBe(false);
+  });
+
+  it('is true for a uid', () => {
+    expect(signedInFrom('u1')).toBe(true);
+  });
+});
+
+describe('homeRouteFor', () => {
+  it('is home when signed in', () => {
+    expect(homeRouteFor(true)).toBe(HOME_ROUTE);
+  });
+
+  it('is the login page when signed out', () => {
+    expect(homeRouteFor(false)).toBe(LOGIN_ROUTE);
+  });
+
+  it('is the login page while it is unknown', () => {
+    expect(homeRouteFor(null)).toBe(LOGIN_ROUTE);
   });
 });

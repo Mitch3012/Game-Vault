@@ -1,0 +1,21 @@
+<section class="flex flex-col gap-4" aria-labelledby="suggestions-heading">
+  <div class="flex items-center justify-between gap-3">
+    <h2 id="suggestions-heading" class="text-lg font-bold text-slate-100">Suggested for you</h2>
+    <button class="vault-btn" type="button" [disabled]="!canRefresh()" (click)="refresh.emit()">Refresh</button>
+  </div>
+
+  @if (message()) {
+    <app-state-message [text]="message()" />
+  } @else {
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (entry of games() ?? []; track entry.rawgId) {
+        <app-game-card
+          [game]="entry"
+          [savedId]="savedIds().get(entry.rawgId) ?? null"
+          (add)="add.emit($event)"
+          (remove)="remove.emit($event)"
+        />
+      }
+    </div>
+  }
+</section>

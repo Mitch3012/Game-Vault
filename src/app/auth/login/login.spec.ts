@@ -50,7 +50,7 @@ describe('LoginComponent', () => {
   it('invites new users to sign up at the bottom of the form', () => {
     const footer = html().querySelector('section > p:last-child');
     expect(footer?.textContent).toContain('New to Game Vault?');
-    expect(footer?.querySelector('a')?.textContent).toContain('Sign up');
+    expect(footer?.querySelector('a')?.textContent).toContain('Sign up here');
   });
 
   it('shows no error banner when there is no login error', () => {

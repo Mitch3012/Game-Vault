@@ -2,9 +2,10 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
+import { SuggestionsService } from './ai/suggestions-service';
 import { Authservice } from './auth/auth-service';
 import { GameVaultCrudService } from './game-vault-crud-service';
-import { GameEntryWithId } from './game-vault-interface';
+import { GameEntryWithId, NewGameEntry } from './game-vault-interface';
 import { ADD_ERROR_MESSAGE, LOGOUT_ERROR_MESSAGE, REMOVE_ERROR_MESSAGE } from './game-vault.constants';
 import { GameVaultService, findByRawgId } from './game-vault-service';
 import { RawgService } from './rawg-service';
@@ -26,9 +27,19 @@ describe('GameVaultService', () => {
   const rawg = { search: () => signal([]), getGame: vi.fn() };
   const auth = { login: vi.fn(), signup: vi.fn(), logout: vi.fn(), signedIn: signal<boolean | null>(true) };
   const router = { navigateByUrl: vi.fn() };
+  const suggestions = {
+    enabled: signal(false),
+    suggestions: signal<NewGameEntry[] | null>([]),
+    failed: signal(false),
+    vaultEmpty: signal(false),
+    setEnabled: vi.fn(),
+    refresh: vi.fn(),
+  };
   let service: GameVaultService;
 
   beforeEach(() => {
+    suggestions.setEnabled.mockReset();
+    suggestions.refresh.mockReset();
     crud.create.mockReset();
     crud.delete.mockReset();
     rawg.getGame.mockReset();
@@ -44,6 +55,7 @@ describe('GameVaultService', () => {
         { provide: RawgService, useValue: rawg },
         { provide: Authservice, useValue: auth },
         { provide: Router, useValue: router },
+        { provide: SuggestionsService, useValue: suggestions },
       ],
     });
     service = TestBed.inject(GameVaultService);
@@ -51,6 +63,25 @@ describe('GameVaultService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('AI suggestions', () => {
+    it('exposes the suggestions state from the suggestions service', () => {
+      expect(service.aiEnabled).toBe(suggestions.enabled);
+      expect(service.suggestions).toBe(suggestions.suggestions);
+      expect(service.suggestionsFailed).toBe(suggestions.failed);
+      expect(service.suggestionsVaultEmpty).toBe(suggestions.vaultEmpty);
+    });
+
+    it('turns the AI on and off through the suggestions service', () => {
+      service.setAiEnabled(true);
+      expect(suggestions.setEnabled).toHaveBeenCalledExactlyOnceWith(true);
+    });
+
+    it('refreshes through the suggestions service', () => {
+      service.refreshSuggestions();
+      expect(suggestions.refresh).toHaveBeenCalledOnce();
+    });
   });
 
   it('returns the existing id instead of saving a duplicate', async () => {
@@ -157,6 +188,23 @@ describe('GameVaultService', () => {
       await service.login('a@b.com', 'wrong');
       service.clearLoginError();
       expect(service.loginError()).toBe('');
+    });
+  });
+
+  describe('homeRoute', () => {
+    it('is home when signed in', () => {
+      auth.signedIn.set(true);
+      expect(service.homeRoute()).toBe('/');
+    });
+
+    it('is the login page when signed out', () => {
+      auth.signedIn.set(false);
+      expect(service.homeRoute()).toBe('/auth');
+    });
+
+    it('is the login page while it is unknown', () => {
+      auth.signedIn.set(null);
+      expect(service.homeRoute()).toBe('/auth');
     });
   });
 

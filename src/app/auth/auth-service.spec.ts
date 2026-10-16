@@ -38,6 +38,28 @@ describe('Authservice', () => {
     expect(service).toBeTruthy();
   });
 
+  describe('userId', () => {
+    it('is null until Firebase reports the auth state', () => {
+      expect(service.userId()).toBeNull();
+    });
+
+    it('is the uid once a user is signed in', () => {
+      authState.next({ uid: 'u1' } as User);
+      expect(service.userId()).toBe('u1');
+    });
+
+    it('is an empty string when nobody is signed in', () => {
+      authState.next(null);
+      expect(service.userId()).toBe('');
+    });
+
+    it('follows the user when they change', () => {
+      authState.next({ uid: 'u1' } as User);
+      authState.next({ uid: 'u2' } as User);
+      expect(service.userId()).toBe('u2');
+    });
+  });
+
   describe('signedIn', () => {
     it('is null until Firebase reports the auth state', () => {
       expect(service.signedIn()).toBeNull();

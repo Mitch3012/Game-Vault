@@ -1,0 +1,37 @@
+type User @table {
+  email: String!
+  username: String!
+  avatarUrl: String
+  createdAt: Timestamp
+}
+
+type Game @table {
+  rawgId: Int64!
+  title: String!
+  coverUrl: String!
+  genre: String!
+  releaseDate: Date
+  developer: String
+  description: String
+}
+
+type LibraryEntry @table {
+  status: String!
+  platform: String!
+  rating: Int
+  userNotes: String
+  dateCompleted: Date
+  user: User!
+  game: Game!
+}
+
+type Collection @table {
+  name: String!
+  description: String
+  user: User!
+}
+
+type CollectionGame @table(key: ["collection", "game"]) {
+  collection: Collection!
+  game: Game!
+}

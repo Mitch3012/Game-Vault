@@ -1,0 +1,74 @@
+mutation CreateSeedData @transaction {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      username: "alice_player",
+      email: "alice@example.com"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440002",
+      username: "bob_gamer",
+      email: "bob@example.com"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440003",
+      username: "charlie_dev",
+      email: "charlie@example.com"
+    }
+  ])
+  game_insertMany(data: [
+    {
+      id: "770e8400-e29b-41d4-a716-446655440001",
+      rawgId: 101,
+      title: "Elden Ring",
+      coverUrl: "https://example.com/elden.jpg",
+      genre: "RPG"
+    },
+    {
+      id: "770e8400-e29b-41d4-a716-446655440002",
+      rawgId: 102,
+      title: "Hades",
+      coverUrl: "https://example.com/hades.jpg",
+      genre: "Roguelike"
+    },
+    {
+      id: "770e8400-e29b-41d4-a716-446655440003",
+      rawgId: 103,
+      title: "Celeste",
+      coverUrl: "https://example.com/celeste.jpg",
+      genre: "Platformer"
+    }
+  ])
+  collection_insertMany(data: [
+    {
+      id: "990e8400-e29b-41d4-a716-446655440001",
+      name: "Favorites",
+      userId: "550e8400-e29b-41d4-a716-446655440001"
+    },
+    {
+      id: "990e8400-e29b-41d4-a716-446655440002",
+      name: "Wishlist",
+      userId: "550e8400-e29b-41d4-a716-446655440002"
+    }
+  ])
+  collectionGame_insertMany(data: [
+    { collectionId: "990e8400-e29b-41d4-a716-446655440001", gameId: "770e8400-e29b-41d4-a716-446655440001" },
+    { collectionId: "990e8400-e29b-41d4-a716-446655440002", gameId: "770e8400-e29b-41d4-a716-446655440002" }
+  ])
+  libraryEntry_insertMany(data: [
+    {
+      status: "COMPLETED",
+      platform: "PC",
+      rating: 10,
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      gameId: "770e8400-e29b-41d4-a716-446655440001"
+    },
+    {
+      status: "PLAYING",
+      platform: "Switch",
+      rating: 9,
+      userId: "550e8400-e29b-41d4-a716-446655440002",
+      gameId: "770e8400-e29b-41d4-a716-446655440003"
+    }
+  ])
+}

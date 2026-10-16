@@ -1,0 +1,116 @@
+mutation CreateUser @auth(level: USER) {
+  user_insert(data: {id_expr: "auth.uid", email: "user@example.com", username: "newuser"})
+}
+
+mutation UpdateUser @auth(level: USER) {
+  user_update(key: {id_expr: "auth.uid"}, data: {username: "updated_name"})
+}
+
+mutation DeleteUser @auth(level: USER) {
+  user_delete(key: {id_expr: "auth.uid"})
+}
+
+query GetCurrentUser @auth(level: USER) {
+  user(key: {id_expr: "auth.uid"}) {
+    username
+    email
+  }
+}
+
+query ListUsers @auth(level: PUBLIC, insecureReason: "Publicly visible usernames") {
+  users {
+    username
+    avatarUrl
+  }
+}
+
+mutation CreateGame @auth(level: PUBLIC, insecureReason: "Catalog is read-only for public") {
+  game_insert(data: {rawgId: 123, title: "Adventure Game", coverUrl: "url", genre: "RPG"})
+}
+
+mutation UpdateGame @auth(level: USER) {
+  game_update(key: {id: "00000000-0000-0000-0000-000000000000"}, data: {developer: "New Dev"})
+}
+
+mutation DeleteGame @auth(level: USER) {
+  game_delete(id: "00000000-0000-0000-0000-000000000000")
+}
+
+query GetGame @auth(level: PUBLIC, insecureReason: "Game details are public") {
+  game(id: "00000000-0000-0000-0000-000000000000") {
+    title
+    genre
+  }
+}
+
+query ListGames @auth(level: PUBLIC, insecureReason: "Game list is public") {
+  games {
+    title
+    developer
+  }
+}
+
+mutation CreateLibraryEntry @auth(level: USER) {
+  libraryEntry_insert(data: {status: "Played", platform: "PC", userId_expr: "auth.uid", game: {id: "00000000-0000-0000-0000-000000000000"}})
+}
+
+mutation UpdateLibraryEntry @auth(level: USER) {
+  libraryEntry_update(key: {id: "00000000-0000-0000-0000-000000000000"}, data: {rating: 5})
+}
+
+mutation DeleteLibraryEntry @auth(level: USER) {
+  libraryEntry_delete(key: {id: "00000000-0000-0000-0000-000000000000"})
+}
+
+query GetLibraryEntry @auth(level: USER) {
+  libraryEntry(key: {id: "00000000-0000-0000-0000-000000000000"}) {
+    status
+    rating
+  }
+}
+
+query ListMyLibrary @auth(level: USER) {
+  libraryEntries(where: {userId: {eq_expr: "auth.uid"}}) {
+    game { title }
+    status
+  }
+}
+
+mutation CreateCollection @auth(level: USER) {
+  collection_insert(data: {name: "Favorites", userId_expr: "auth.uid"})
+}
+
+mutation UpdateCollection @auth(level: USER) {
+  collection_update(key: {id: "00000000-0000-0000-0000-000000000000"}, data: {description: "Updated desc"})
+}
+
+mutation DeleteCollection @auth(level: USER) {
+  collection_delete(key: {id: "00000000-0000-0000-0000-000000000000"})
+}
+
+query GetCollection @auth(level: USER) {
+  collection(key: {id: "00000000-0000-0000-0000-000000000000"}) {
+    name
+    description
+  }
+}
+
+query ListMyCollections @auth(level: USER) {
+  collections(where: {userId: {eq_expr: "auth.uid"}}) {
+    name
+  }
+}
+
+mutation CreateCollectionGame @auth(level: USER) {
+  collectionGame_insert(data: {collectionId: "00000000-0000-0000-0000-000000000000", gameId: "00000000-0000-0000-0000-000000000000"})
+}
+
+mutation DeleteCollectionGame @auth(level: USER) {
+  collectionGame_delete(key: {collectionId: "00000000-0000-0000-0000-000000000000", gameId: "00000000-0000-0000-0000-000000000000"})
+}
+
+query ListCollectionGames @auth(level: USER) {
+  collectionGames(where: {collectionId: {eq: "00000000-0000-0000-0000-000000000000"}}) {
+    game { title }
+  }
+}

@@ -9,7 +9,11 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 // 1. Import 'getApp' from '@angular/fire/app'
 import { initializeApp, provideFirebaseApp, getApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
-import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angular/fire/app-check';
+import {
+  initializeAppCheck,
+  provideAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from '@angular/fire/app-check';
 
 import { routes } from './app.routes';
 import { FirebaseStatusService } from './firebase-status-service';
@@ -32,7 +36,7 @@ export const appConfig: ApplicationConfig = {
 
       // 3. Use getApp() here instead of undefined
       return initializeAppCheck(getApp(), {
-        provider: new ReCaptchaV3Provider(environment.recaptchaSiteKey),
+        provider: new ReCaptchaEnterpriseProvider(environment.recaptchaSiteKey),
         isTokenAutoRefreshEnabled: true,
       });
     }),

@@ -57,7 +57,7 @@ export const environment = {
   appId: '<app id>',
   measurementId: '<measurement id>',
   rawgApiKey: '<rawg api key>',
-  recaptchaSiteKey: '<reCAPTCHA v3 site key for App Check>',
+  recaptchaSiteKey: '<reCAPTCHA Enterprise site key for App Check>',
   appCheckDebugToken: '', // only needed for local development
 };
 ```

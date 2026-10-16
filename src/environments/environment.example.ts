@@ -14,7 +14,7 @@ export const environment = {
   rawgApiKey: '<rawg api key>',
 
   // reCAPTCHA v3 site key registered for App Check.
-  recaptchaSiteKey: '<reCAPTCHA v3 site key for App Check>',
+  recaptchaSiteKey: '<reCAPTCHA Enterprise site key for App Check>',
 
   // Only for local development: a debug token registered under App Check, Manage debug tokens.
   appCheckDebugToken: '',
